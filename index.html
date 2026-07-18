@@ -1,0 +1,687 @@
+
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Økonomisk fremtid</title>
+<style>
+:root{
+ --bg:#f4f7fb;--panel:#fff;--panel2:#f7f9fc;--text:#142033;--muted:#6d7888;--line:#dce3ec;
+ --brand:#0f766e;--brand2:#14b8a6;--blue:#2563eb;--gold:#d97706;--red:#dc2626;--green:#15803d;
+ --shadow:0 12px 34px rgba(15,23,42,.08);--radius:18px
+}
+body.dark{
+ --bg:#0b1220;--panel:#111a2b;--panel2:#172238;--text:#edf4ff;--muted:#9cacbf;--line:#26364d;
+ --shadow:0 12px 36px rgba(0,0,0,.34)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);background:var(--bg)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:rgba(244,247,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+body.dark .topbar{background:rgba(11,18,32,.86)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:18px}
+.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;color:#fff;font-weight:900;box-shadow:0 8px 22px rgba(20,184,166,.28)}
+.top-actions{display:flex;align-items:center;gap:8px}
+.iconbtn,.chipbtn,.primary,.secondary,.danger{border:0;border-radius:12px;padding:10px 13px;font-weight:750}
+.iconbtn,.chipbtn,.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 8px 22px rgba(20,184,166,.22)}
+.danger{background:#fee2e2;color:#991b1b}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;padding:20px;max-width:1540px;margin:auto}
+.sidebar{position:sticky;top:88px;height:fit-content;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+.navitem{display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:var(--muted);padding:12px 13px;border-radius:12px;text-align:left;font-weight:750;margin:2px 0}
+.navitem.active{background:linear-gradient(135deg,rgba(15,118,110,.14),rgba(20,184,166,.08));color:var(--brand)}
+.navicon{font-size:18px;width:22px;text-align:center}
+.main{min-width:0}
+.page{display:none}.page.active{display:block}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.hero-card{padding:24px;background:linear-gradient(135deg,#0f172a,#134e4a);color:#fff;overflow:hidden;position:relative}
+.hero-card:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(45,212,191,.16);right:-90px;top:-110px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hero-card .eyebrow{color:#b9f4eb}
+.big{font-size:clamp(32px,5vw,58px);font-weight:900;letter-spacing:-.045em;line-height:1.02;margin:8px 0}
+.sub{font-size:13px;color:var(--muted)}
+.hero-card .sub{color:#d8f6f1}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:14px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);transition:.18s transform}
+.kpi:hover{transform:translateY(-2px)}
+.kpi .value{font-weight:900;font-size:24px;margin-top:6px;color:var(--text)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+.section-title h2,.section-title h3{margin:0}
+.progress{height:12px;background:var(--panel2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:999px}
+.milestone{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.milestone:last-child{border-bottom:0}
+.micon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--panel2);font-size:20px}
+canvas{width:100%;height:100%;display:block}
+.chartbox{height:390px;position:relative}
+.chartbox.tall{height:520px}
+.tooltip{position:fixed;z-index:60;display:none;pointer-events:none;background:#0f172a;color:#fff;padding:9px 11px;border-radius:10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 11px}
+.sliderline{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center}
+input[type=range]{accent-color:var(--brand)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;max-height:520px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--panel2);z-index:2}
+td input,td select{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:7px}
+.row-linked{background:rgba(20,184,166,.07)}
+.badge{font-size:11px;font-weight:850;border-radius:999px;padding:5px 8px;background:var(--panel2);border:1px solid var(--line)}
+.good{color:var(--green)}.warn{color:var(--gold)}.bad{color:var(--red)}
+.insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.insight{border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:14px;background:linear-gradient(135deg,var(--panel),var(--panel2));padding:14px}
+.insight.warn{border-left-color:var(--gold)}.insight.bad{border-left-color:var(--red)}.insight.good{border-left-color:var(--green)}
+.insight strong{display:block;margin-bottom:5px}
+.actions-list{display:grid;gap:10px}
+.action{display:grid;grid-template-columns:38px 1fr auto;gap:11px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel2)}
+.step{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:900}
+.scenario-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.decision-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--panel)}
+.decision-result{font-size:28px;font-weight:900;margin-top:8px}
+.timeline{display:flex;gap:12px;overflow:auto;padding-bottom:8px}
+.time-card{min-width:210px;border:1px solid var(--line);border-radius:16px;padding:15px;background:var(--panel2)}
+.bottom-nav{display:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modalbox{width:min(680px,100%);max-height:86vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+.toast{position:fixed;right:18px;bottom:18px;z-index:90;background:#0f172a;color:#fff;border-radius:12px;padding:12px 14px;display:none}
+.small-actions{display:flex;gap:8px;flex-wrap:wrap}
+details{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+summary{cursor:pointer;font-weight:850}
+@media(max-width:1050px){
+ .layout{grid-template-columns:1fr;padding:14px 14px 92px}
+ .sidebar{display:none}
+ .bottom-nav{position:fixed;left:10px;right:10px;bottom:10px;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(17,24,39,.93);backdrop-filter:blur(18px);border-radius:18px;padding:7px;box-shadow:0 12px 40px rgba(0,0,0,.28)}
+ .bottom-nav button{border:0;background:transparent;color:#9ca3af;border-radius:12px;padding:8px 3px;font-size:11px}
+ .bottom-nav button.active{background:#1f766f;color:#fff}
+ .bottom-nav span{display:block;font-size:19px;margin-bottom:2px}
+ .hero{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+ .topbar{padding:11px 13px}.top-actions .hide-mobile{display:none}
+ .hero-card{padding:20px}.grid2,.grid3,.form-grid,.scenario-grid{grid-template-columns:1fr}
+ .kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi{padding:13px}.kpi .value{font-size:20px}
+ .chartbox{height:320px}.chartbox.tall{height:400px}
+ .sliderline{grid-template-columns:1fr 105px}
+ .action{grid-template-columns:36px 1fr}.action>div:last-child{grid-column:2}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">Ø</div><div><span>Økonomisk fremtid</span><div style="font-size:11px;font-weight:650;color:var(--muted)">Ta bedre valg i dag – forstå konsekvensene over tid</div></div></div>
+  <div class="top-actions">
+    <span id="saveStatus" class="sub hide-mobile">Lagret lokalt</span>
+    <button class="iconbtn" onclick="toggleTheme()" title="Mørk/lys">◐</button>
+    <button class="iconbtn hide-mobile" onclick="openModal('dataModal')">Data</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <button class="navitem active" data-page="dashboard"><span class="navicon">⌂</span>Dashboard</button>
+  <button class="navitem" data-page="budget"><span class="navicon">▦</span>Budsjett</button>
+  <button class="navitem" data-page="future"><span class="navicon">↗</span>Fremtid</button>
+  <button class="navitem" data-page="decisions"><span class="navicon">◇</span>Beslutninger</button>
+  <button class="navitem" data-page="settings"><span class="navicon">⚙</span>Innstillinger</button>
+</aside>
+
+<main class="main">
+<section id="dashboard" class="page active">
+  <div class="hero">
+    <div class="card hero-card">
+      <div class="eyebrow">Forventet nettoformue ved pensjon</div>
+      <div id="heroFuture" class="big">–</div>
+      <div id="heroReal" class="sub">– i dagens kroner</div>
+      <div style="margin-top:24px">
+        <div class="sub">Fremdrift mot første langsiktige mål</div>
+        <div class="progress" style="margin-top:8px"><span id="heroProgress" style="width:0%"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Økonomisk helse</div>
+      <div id="healthScore" class="big" style="color:var(--brand)">–</div>
+      <div id="healthText" class="sub">–</div>
+      <div class="progress" style="margin-top:14px"><span id="healthProgress"></span></div>
+      <div id="topAdvice" style="margin-top:16px;font-weight:800"></div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="eyebrow">Nettoformue nå</div><div id="kpiNetWorth" class="value">–</div><div class="sub">Bolig, investering og pensjon</div></div>
+    <div class="kpi"><div class="eyebrow">Månedlig investering</div><div id="kpiInvestment" class="value">–</div><div class="sub">Koblet til budsjettet</div></div>
+    <div class="kpi"><div class="eyebrow">Kontantstrøm</div><div id="kpiCashflow" class="value">–</div><div class="sub">Etter alle registrerte poster</div></div>
+    <div class="kpi"><div class="eyebrow">Rentetålighet</div><div id="kpiRateTolerance" class="value">–</div><div class="sub">Omtrentlig rente før null</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="section-title"><div><h3>Formuesutvikling</h3><div class="sub">Forventet scenario</div></div><span class="badge">Interaktiv</span></div>
+      <div class="chartbox"><canvas id="dashboardChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="section-title"><div><h3>Neste milepæler</h3><div class="sub">Hva planen kan føre til</div></div></div>
+      <div id="milestones"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Din prioriterte plan</h3><div class="sub">Tre viktigste tiltak akkurat nå</div></div></div>
+    <div id="dashboardActions" class="actions-list"></div>
+  </div>
+</section>
+
+<section id="budget" class="page">
+  <div class="section-title"><div><h2>Budsjett</h2><div class="sub">Planlagt månedlig kontantstrøm</div></div><button class="secondary" onclick="addBudgetRow()">+ Ny post</button></div>
+  <div class="kpis">
+    <div class="kpi"><div class="eyebrow">Netto inntekt</div><div id="bIncome" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Utgifter</div><div id="bExpenses" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Investering</div><div id="bInvestment" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Til overs</div><div id="bRemaining" class="value">–</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="section-title"><div><h3>Fordeling</h3><div class="sub">Faste, variable, årlige avsetninger og investering</div></div></div>
+      <div class="chartbox"><canvas id="budgetChart"></canvas></div>
+      <div id="budgetLegend"></div>
+    </div>
+    <div class="card">
+      <div class="section-title"><div><h3>Økonomisk profil</h3><div class="sub">Gjør innsiktene mer relevante</div></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Netto månedslønn</label><input id="netIncome" type="number"></div>
+        <div class="field"><label>Disponibel buffer</label><input id="buffer" type="number"></div>
+        <div class="field"><label>Voksne</label><input id="adults" type="number" min="1"></div>
+        <div class="field"><label>Barn</label><input id="children" type="number" min="0"></div>
+        <div class="field"><label>Har bil</label><select id="hasCar"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+        <div class="field"><label>Eier bolig</label><select id="ownsHome"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Budsjettposter</h3><div class="sub">Feltene oppdateres uten at tabellen hopper eller mister fokus</div></div><button class="secondary" onclick="addRecommendedZeroRows()">Legg til anbefalte poster</button></div>
+    <div class="tablewrap">
+      <table><thead><tr><th>Kategori</th><th>Beløp</th><th>%</th><th>Type</th><th></th></tr></thead><tbody id="budgetBody"></tbody><tfoot><tr><th>Sum</th><th id="budgetSum">–</th><th id="budgetPct">–</th><th colspan="2"></th></tr></tfoot></table>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <div class="section-title"><div><h3>Årlige kostnader</h3><div class="sub">Omregnes til månedlig belastning</div></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Ferie og reise / år</label><input id="annualTravel" type="number"></div>
+        <div class="field"><label>Gaver og høytider / år</label><input id="annualGifts" type="number"></div>
+        <div class="field"><label>Helse og tannlege / år</label><input id="annualHealth" type="number"></div>
+        <div class="field"><label>Bolig/bil vedlikehold / år</label><input id="annualMaintenance" type="number"></div>
+      </div>
+      <div id="annualMonthly" style="margin-top:14px;font-weight:850"></div>
+    </div>
+    <div class="card">
+      <div class="section-title"><div><h3>Personlige innsikter</h3><div class="sub">Oppdateres automatisk</div></div></div>
+      <div id="budgetInsights" class="insights"></div>
+    </div>
+  </div>
+</section>
+
+<section id="future" class="page">
+  <div class="section-title"><div><h2>Fremtid</h2><div class="sub">Hvordan økonomien utvikler seg over livet</div></div></div>
+  <div class="card">
+    <div class="section-title">
+      <div><h3>Nettoformue</h3><div class="sub">Konservativt, forventet og sterkt scenario</div></div>
+      <select id="futureMode" class="chipbtn"><option value="nominal">Nominelle kroner</option><option value="real">Dagens kroner</option><option value="components">Komponenter</option></select>
+    </div>
+    <div class="chartbox tall"><canvas id="futureChart"></canvas></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Tidslinje</h3><div class="sub">Planlagte milepæler</div></div></div>
+    <div id="timeline" class="timeline"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Årsprognose</h3><div class="sub">Detaljert utvikling</div></div></div>
+    <div class="tablewrap"><table><thead><tr><th>År / alder</th><th>Lønn</th><th>Mnd. investering</th><th>Portefølje</th><th>Pensjon</th><th>Boligkapital</th><th>Nettoformue</th><th>Dagens kroner</th></tr></thead><tbody id="forecastBody"></tbody></table></div>
+  </div>
+</section>
+
+<section id="decisions" class="page">
+  <div class="section-title"><div><h2>Beslutninger</h2><div class="sub">Se konsekvensen av økonomiske valg før du tar dem</div></div></div>
+  <div class="scenario-grid">
+    <div class="decision-card">
+      <h3>Endre månedlig investering</h3>
+      <div class="sliderline"><input id="decisionInvestmentRange" type="range" min="0" max="30000" step="500"><input id="decisionInvestment" type="number"></div>
+      <div class="sub">Endring i forventet nettoformue ved pensjon</div>
+      <div id="decisionInvestmentResult" class="decision-result">–</div>
+      <div id="decisionInvestmentTime" class="sub"></div>
+    </div>
+    <div class="decision-card">
+      <h3>Engangskjøp</h3>
+      <div class="field"><label>Kostnad i dag</label><input id="decisionPurchase" type="number" value="25000"></div>
+      <div class="sub">Alternativ fremtidig verdi dersom beløpet investeres</div>
+      <div id="decisionPurchaseResult" class="decision-result">–</div>
+    </div>
+    <div class="decision-card">
+      <h3>Ny bolig</h3>
+      <div class="field"><label>Ny boligverdi</label><input id="decisionHomeValue" type="number"></div>
+      <div class="field" style="margin-top:10px"><label>Nytt boliglån</label><input id="decisionMortgage" type="number"></div>
+      <div class="sub">Anslått endring i nettoformue ved pensjon</div>
+      <div id="decisionHomeResult" class="decision-result">–</div>
+    </div>
+    <div class="decision-card">
+      <h3>Rentestress</h3>
+      <div id="decisionRatePanel"></div>
+    </div>
+  </div>
+</section>
+
+<section id="settings" class="page">
+  <div class="section-title"><div><h2>Innstillinger</h2><div class="sub">Forutsetninger, lån, scenarioer og personvern</div></div></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Inntekt og investering</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Startalder</label><input id="startAge" type="number"></div>
+        <div class="field"><label>Pensjonsalder</label><input id="retireAge" type="number"></div>
+        <div class="field"><label>Startår</label><input id="startYear" type="number"></div>
+        <div class="field"><label>Årslønn</label><input id="salary" type="number"></div>
+        <div class="field"><label>Lønnsvekst %</label><input id="salaryGrowth" type="number" step=".1"></div>
+        <div class="field"><label>Andel lønnsøkning til investering %</label><input id="raiseShare" type="number"></div>
+        <div class="field"><label>Årlig bonusinvestering</label><input id="bonus" type="number"></div>
+        <div class="field"><label>Årlig IPS</label><input id="ipsAnnual" type="number"></div>
+        <div class="field"><label>OTP-sats %</label><input id="otpRate" type="number" step=".1"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Startkapital og bolig</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Ordinær portefølje</label><input id="portfolioStart" type="number"></div>
+        <div class="field"><label>IPS-saldo</label><input id="ipsStart" type="number"></div>
+        <div class="field"><label>Pensjonskonto</label><input id="otpStart" type="number"></div>
+        <div class="field"><label>Boligverdi</label><input id="homeValue" type="number"></div>
+        <div class="field"><label>Boliglån</label><input id="mortgage" type="number"></div>
+        <div class="field"><label>Boligprisvekst %</label><input id="homeGrowth" type="number" step=".1"></div>
+        <div class="field"><label>Årlig avdrag</label><input id="annualPrincipal" type="number"></div>
+        <div class="field"><label>Ta med bolig</label><select id="includeHome"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Lån og rentetålighet</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Boliglånsrente %</label><input id="mortgageRate" type="number" step=".1"></div>
+        <div class="field"><label>Gjenværende løpetid</label><input id="loanYears" type="number"></div>
+        <div class="field"><label>Lånetype</label><select id="loanType"><option value="annuity">Annuitetslån</option><option value="serial">Serielån</option><option value="interestOnly">Avdragsfritt</option></select></div>
+        <div class="field"><label>Boliglånsbetaling i budsjett</label><input id="budgetMortgagePayment" type="number"></div>
+      </div>
+      <div id="settingsRatePanel" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <h3>Avkastning og inflasjon</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Inflasjon %</label><input id="inflation" type="number" step=".1"></div>
+        <div class="field"><label>Konservativ avkastning %</label><input id="retLow" type="number" step=".1"></div>
+        <div class="field"><label>Forventet avkastning %</label><input id="retMid" type="number" step=".1"></div>
+        <div class="field"><label>Sterk avkastning %</label><input id="retHigh" type="number" step=".1"></div>
+        <div class="field"><label>Buffer-mål i månedslønner</label><input id="goalBufferMonths" type="number" step=".5"></div>
+        <div class="field"><label>Investeringsmål % av netto</label><input id="goalInvestmentRate" type="number"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Data og personvern</h3><div class="sub">Alt lagres lokalt på denne enheten</div></div></div>
+    <div class="small-actions">
+      <button class="secondary" onclick="exportData()">Eksporter sikkerhetskopi</button>
+      <label class="secondary" style="cursor:pointer">Importer<input id="importFile" type="file" accept=".json" hidden></label>
+      <button class="danger" onclick="resetAll()">Tilbakestill alt</button>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<nav class="bottom-nav">
+ <button class="active" data-page="dashboard"><span>⌂</span>Hjem</button>
+ <button data-page="budget"><span>▦</span>Budsjett</button>
+ <button data-page="future"><span>↗</span>Fremtid</button>
+ <button data-page="decisions"><span>◇</span>Valg</button>
+ <button data-page="settings"><span>⚙</span>Mer</button>
+</nav>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+<div id="toast" class="toast"></div>
+
+<div id="onboardingModal" class="modal">
+  <div class="modalbox">
+    <div class="eyebrow">Velkommen</div>
+    <h2 style="margin-top:6px">Sett opp din økonomiske fremtid</h2>
+    <p class="sub">Appen lagrer kun data lokalt på enheten din. Start med nøytrale eksempelverdier og erstatt dem med dine egne.</p>
+    <div class="form-grid" style="margin-top:16px">
+      <div class="field"><label>Netto månedslønn</label><input id="onboardIncome" type="number" value="35000"></div>
+      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="3000"></div>
+      <div class="field"><label>Alder</label><input id="onboardAge" type="number" value="30"></div>
+      <div class="field"><label>Ønsket pensjonsalder</label><input id="onboardRetire" type="number" value="67"></div>
+    </div>
+    <div class="small-actions" style="margin-top:16px">
+      <button class="primary" onclick="completeOnboarding()">Kom i gang</button>
+      <button class="secondary" onclick="closeModal('onboardingModal')">Utforsk først</button>
+    </div>
+  </div>
+</div>
+
+<div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" onclick="exportData()">Eksporter</button><button class="primary" onclick="closeModal('dataModal')">Lukk</button></div></div></div>
+
+<script>
+const fmtNok=n=>new Intl.NumberFormat("nb-NO",{style:"currency",currency:"NOK",maximumFractionDigits:0}).format(Number(n)||0);
+const fmtPct=n=>new Intl.NumberFormat("nb-NO",{style:"percent",maximumFractionDigits:1}).format(Number(n)||0);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const STORAGE="okonomiskFremtidPWA_v1";
+
+const defaultState={
+ ui:{theme:"light",page:"dashboard"},
+ life:{
+  startAge:30,retireAge:67,startYear:2026,salary:600000,salaryGrowth:5,raiseShare:50,
+  monthlyInvestment:3000,bonus:0,ipsAnnual:0,otpRate:2,
+  portfolioStart:0,ipsStart:0,otpStart:0,
+  includeHome:true,homeValue:0,mortgage:0,homeGrowth:2,annualPrincipal:0,
+  mortgageRate:5.0,loanYears:25,loanType:"annuity",
+  inflation:2,retLow:7,retMid:9,retHigh:11
+ },
+ profile:{netIncome:35000,buffer:0,adults:1,children:0,ownsHome:true,hasCar:true,goalBufferMonths:2,goalInvestmentRate:15},
+ annual:{travel:0,gifts:0,health:0,maintenance:0},
+ budget:[
+  {id:"mortgage",name:"Boliglån",amount:0,type:"fixed"},
+  {id:"misc",name:"Annet",amount:0,type:"variable"},
+  {id:"studentLoan",name:"Studielån",amount:0,type:"fixed"},
+  {id:"common",name:"Felleskostnader",amount:0,type:"fixed"},
+  {id:"insurance",name:"Forsikringer",amount:0,type:"fixed"},
+  {id:"groceries",name:"Dagligvarer",amount:4000,type:"variable"},
+  {id:"restaurant",name:"Restaurant og uteliv",amount:1000,type:"variable"},
+  {id:"transport",name:"Transport",amount:1500,type:"variable"},
+  {id:"electricity",name:"Strøm",amount:1000,type:"fixed"},
+  {id:"subscriptions",name:"Abonnement",amount:500,type:"fixed"},
+  {id:"leisure",name:"Fritid",amount:1500,type:"variable"},
+  {id:"personalCare",name:"Personlig pleie",amount:500,type:"variable"},
+  {id:"investment",name:"Investering",amount:3000,type:"saving",linked:true},
+  {id:"health",name:"Helse og tannlege",amount:0,type:"variable"},
+  {id:"clothing",name:"Klær og sko",amount:0,type:"variable"},
+  {id:"travel",name:"Ferie og reise",amount:0,type:"variable"},
+  {id:"gifts",name:"Gaver og høytider",amount:0,type:"variable"},
+  {id:"homeMaintenance",name:"Boligvedlikehold og innbo",amount:0,type:"variable"},
+  {id:"vehicle",name:"Bilhold og vedlikehold",amount:0,type:"variable"},
+  {id:"bufferSaving",name:"Buffersparing",amount:0,type:"saving"},
+  {id:"education",name:"Kompetanse og kurs",amount:0,type:"variable"},
+  {id:"electronics",name:"Elektronikk",amount:0,type:"variable"}
+ ]
+};
+let state=loadState();
+let projections={};
+
+
+function completeOnboarding(){
+ state.profile.netIncome=Math.max(0,Number(document.getElementById("onboardIncome").value)||0);
+ state.life.monthlyInvestment=Math.max(0,Number(document.getElementById("onboardInvestment").value)||0);
+ state.life.startAge=Math.max(18,Number(document.getElementById("onboardAge").value)||30);
+ state.life.retireAge=Math.max(state.life.startAge+1,Number(document.getElementById("onboardRetire").value)||67);
+ const inv=state.budget.find(x=>x.linked);if(inv)inv.amount=state.life.monthlyInvestment;
+ state.ui.onboarded=true;closeModal("onboardingModal");renderAll();saveState();
+}
+
+function loadState(){
+ try{
+  const raw=localStorage.getItem(STORAGE);
+  if(raw){
+   const x=JSON.parse(raw);
+   return {...clone(defaultState),...x,life:{...defaultState.life,...x.life},profile:{...defaultState.profile,...x.profile},annual:{...defaultState.annual,...x.annual},budget:Array.isArray(x.budget)?x.budget:clone(defaultState.budget)};
+  }
+ }catch(e){}
+ return clone(defaultState);
+}
+let saveTimer;
+function saveState(){
+ clearTimeout(saveTimer);
+ saveTimer=setTimeout(()=>{
+  localStorage.setItem(STORAGE,JSON.stringify(state));
+  document.getElementById("saveStatus").textContent="Lagret "+new Date().toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit"});
+ },180);
+}
+function toast(msg){const e=document.getElementById("toast");e.textContent=msg;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
+function openModal(id){document.getElementById(id).classList.add("open")}
+function closeModal(id){document.getElementById(id).classList.remove("open")}
+function toggleTheme(){state.ui.theme=state.ui.theme==="dark"?"light":"dark";applyTheme();saveState();renderAll()}
+function applyTheme(){document.body.classList.toggle("dark",state.ui.theme==="dark")}
+
+function annualMonthly(){return (state.annual.travel+state.annual.gifts+state.annual.health+state.annual.maintenance)/12}
+function totals(){
+ const investment=state.budget.filter(x=>x.linked).reduce((s,x)=>s+x.amount,0);
+ const otherSaving=state.budget.filter(x=>!x.linked&&x.type==="saving").reduce((s,x)=>s+x.amount,0);
+ const fixed=state.budget.filter(x=>x.type==="fixed").reduce((s,x)=>s+x.amount,0);
+ const variable=state.budget.filter(x=>x.type==="variable").reduce((s,x)=>s+x.amount,0);
+ const annual=annualMonthly(),expenses=fixed+variable+annual,total=expenses+investment+otherSaving;
+ return {investment,otherSaving,fixed,variable,annual,expenses,total,remaining:state.profile.netIncome-total}
+}
+function mortgagePayment(balance,annualRate,years,type){
+ balance=Math.max(0,balance);const r=Math.max(0,annualRate)/12,n=Math.max(1,years*12);
+ if(!balance)return 0;if(type==="interestOnly")return balance*r;if(type==="serial")return balance/n+balance*r;if(!r)return balance/n;
+ return balance*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1)
+}
+function mortgageData(){
+ const l=state.life,t=totals(),entered=state.budget.find(x=>x.id==="mortgage")?.amount||0;
+ const currentRate=l.mortgageRate/100,stressRate=Math.max(.07,currentRate+.03);
+ const current=mortgagePayment(l.mortgage,currentRate,l.loanYears,l.loanType);
+ const stress=mortgagePayment(l.mortgage,stressRate,l.loanYears,l.loanType);
+ const stressRemaining=t.remaining+entered-stress;
+ let lo=0,hi=.30,available=t.remaining+entered;
+ for(let i=0;i<65;i++){const m=(lo+hi)/2;if(mortgagePayment(l.mortgage,m,l.loanYears,l.loanType)<=available)lo=m;else hi=m}
+ return {currentRate,stressRate,current,stress,stressRemaining,maxRate:lo,entered}
+}
+function project(rate){
+ const l=state.life,rows=[];let salary=l.salary,monthly=l.monthlyInvestment,bonus=l.bonus,port=l.portfolioStart,ips=l.ipsStart,otp=l.otpStart;
+ let home=l.includeHome?l.homeValue:0,loan=l.includeHome?l.mortgage:0,price=1;
+ for(let i=0;i<=l.retireAge-l.startAge;i++){
+  const ordinary=monthly*12,otpIn=salary*l.otpRate/100;
+  port=(port+ordinary+bonus)*(1+rate);ips=(ips+l.ipsAnnual)*(1+rate);otp=(otp+otpIn)*(1+rate);
+  if(l.includeHome){home*=1+l.homeGrowth/100;loan=Math.max(0,loan-l.annualPrincipal)}
+  price*=1+l.inflation/100;
+  const equity=l.includeHome?home-loan:0,net=port+ips+otp+equity;
+  rows.push({year:l.startYear+i,age:l.startAge+i,salary,monthly,port,ips,otp,pension:ips+otp,home,loan,equity,net,real:net/price});
+  const raise=salary*l.salaryGrowth/100;salary+=raise;monthly+=raise*l.raiseShare/100/12;bonus+=bonus*l.salaryGrowth/100*l.raiseShare/100;
+ }
+ return rows
+}
+function recalc(){
+ projections.low=project(state.life.retLow/100);
+ projections.mid=project(state.life.retMid/100);
+ projections.high=project(state.life.retHigh/100);
+}
+function nowNetWorth(){const l=state.life;return l.portfolioStart+l.ipsStart+l.otpStart+(l.includeHome?l.homeValue-l.mortgage:0)}
+function health(){
+ const t=totals(),m=mortgageData(),income=Math.max(1,state.profile.netIncome);
+ let score=100,issues=[];
+ if(t.remaining<0){score-=30;issues.push(["bad","Budsjettet går i minus",`Du mangler ${fmtNok(Math.abs(t.remaining))} per måned.`])}
+ else if(t.remaining<income*.03){score-=10;issues.push(["warn","Liten månedlig margin",`Bare ${fmtNok(t.remaining)} er udisponert.`])}
+ const bufferMonths=state.profile.buffer/income;
+ if(bufferMonths<state.profile.goalBufferMonths*.5){score-=22;issues.push(["bad","Lav buffer",`Bufferen tilsvarer ${bufferMonths.toFixed(1)} månedslønner.`])}
+ else if(bufferMonths<state.profile.goalBufferMonths){score-=10;issues.push(["warn","Buffer under mål",`Du mangler ${fmtNok(state.profile.goalBufferMonths*income-state.profile.buffer)}.`])}
+ else issues.push(["good","Buffer på mål",`${bufferMonths.toFixed(1)} månedslønner.`]);
+ const invRate=t.investment/income;
+ if(invRate<state.profile.goalInvestmentRate/100){score-=8;issues.push(["warn","Under investeringsmål",`${fmtPct(invRate)} mot mål ${fmtPct(state.profile.goalInvestmentRate/100)}.`])}
+ else issues.push(["good","Investeringsmålet er nådd",`${fmtPct(invRate)} av nettoinntekten.`]);
+ if(t.fixed/income>.65){score-=15;issues.push(["bad","Høy andel faste kostnader",`${fmtPct(t.fixed/income)} av nettoinntekten.`])}
+ else if(t.fixed/income>.50){score-=7;issues.push(["warn","Mye er bundet",`${fmtPct(t.fixed/income)} i faste kostnader.`])}
+ if(m.stressRemaining<0){score-=12;issues.push(["bad","Sårbar for renteøkning",`${fmtNok(m.stressRemaining)} igjen ved ${fmtPct(m.stressRate)}.`])}
+ else issues.push(["good","Rentestressen er håndterbar",`${fmtNok(m.stressRemaining)} igjen ved ${fmtPct(m.stressRate)}.`]);
+ return {score:Math.max(0,Math.min(100,Math.round(score))),issues}
+}
+function prioritizedActions(){
+ const t=totals(),h=health(),actions=[];
+ if(t.remaining<0)actions.push(["Få budsjettet i balanse",`Reduser kostnader eller investering med minst ${fmtNok(Math.abs(t.remaining))}.`,fmtNok(Math.abs(t.remaining))+"/mnd"]);
+ const bufferGap=state.profile.goalBufferMonths*state.profile.netIncome-state.profile.buffer;
+ if(bufferGap>0)actions.push(["Bygg buffer",`Prioriter buffer til målet på ${state.profile.goalBufferMonths} månedslønner.`,fmtNok(bufferGap)]);
+ const subs=state.budget.find(x=>x.id==="subscriptions")?.amount||0;
+ if(subs>state.profile.netIncome*.03)actions.push(["Gå gjennom abonnement",`Abonnement utgjør ${fmtPct(subs/state.profile.netIncome)} av inntekten.`,"200–600 kr"]);
+ const ins=state.budget.find(x=>x.id==="insurance")?.amount||0;
+ if(ins>state.profile.netIncome*.08)actions.push(["Sammenlign forsikring",`Forsikring utgjør ${fmtPct(ins/state.profile.netIncome)} av nettoinntekten.`,"Mulig kutt"]);
+ if(t.remaining>0 && t.investment/state.profile.netIncome<state.profile.goalInvestmentRate/100)actions.push(["Øk investeringen gradvis",`Du har ${fmtNok(t.remaining)} udisponert.`,fmtNok(Math.min(t.remaining,state.profile.netIncome*state.profile.goalInvestmentRate/100-t.investment))]);
+ if(!actions.length)actions.push(["Automatiser planen","Budsjettet er robust. Automatiser investering og årlige avsetninger.","Bevar planen"]);
+ return actions.slice(0,3)
+}
+function milestones(){
+ const rows=projections.mid,vals=[
+  {label:"1 million investert",key:"port",target:1e6,icon:"🌱"},
+  {label:"5 millioner investert",key:"port",target:5e6,icon:"🚀"},
+  {label:"10 millioner nettoformue",key:"net",target:10e6,icon:"🏆"},
+  {label:"Boliglån under 2 millioner",key:"loan",target:2e6,inverse:true,icon:"🏠"}
+ ];
+ return vals.map(v=>{
+  const r=rows.find(x=>v.inverse?x[v.key]<=v.target:x[v.key]>=v.target);
+  const now=v.key==="port"?state.life.portfolioStart:v.key==="net"?nowNetWorth():state.life.mortgage;
+  const pct=v.inverse?Math.max(0,Math.min(100,(1-now/v.target)*100)):Math.max(0,Math.min(100,now/v.target*100));
+  return {...v,row:r,pct}
+ })
+}
+function futureValueMonthly(pmt,rate,years){const rm=Math.pow(1+rate,1/12)-1,n=years*12;return rm?pmt*(Math.pow(1+rm,n)-1)/rm:pmt*n}
+
+function renderAll(){
+ recalc();renderDashboard();renderBudget();renderFuture();renderDecisions();renderSettings();saveState()
+}
+function renderDashboard(){
+ const last=projections.mid.at(-1),h=health(),t=totals(),m=mortgageData(),nw=nowNetWorth();
+ document.getElementById("heroFuture").textContent=fmtNok(last.net);
+ document.getElementById("heroReal").textContent=fmtNok(last.real)+" i dagens kroner";
+ const firstGoal=10e6;document.getElementById("heroProgress").style.width=Math.min(100,nw/firstGoal*100)+"%";
+ document.getElementById("healthScore").textContent=h.score+"/100";document.getElementById("healthProgress").style.width=h.score+"%";
+ document.getElementById("healthText").textContent=h.score>=80?"Svært robust":h.score>=60?"God, med forbedringspunkter":"Trenger oppmerksomhet";
+ document.getElementById("topAdvice").textContent=h.issues.find(x=>x[0]!=="good")?.[1]||"Planen din er på god kurs";
+ document.getElementById("kpiNetWorth").textContent=fmtNok(nw);document.getElementById("kpiInvestment").textContent=fmtNok(t.investment);
+ document.getElementById("kpiCashflow").textContent=fmtNok(t.remaining);document.getElementById("kpiCashflow").className="value "+(t.remaining>=0?"good":"bad");
+ document.getElementById("kpiRateTolerance").textContent=fmtPct(m.maxRate);
+ drawLineChart("dashboardChart",[{name:"Nettoformue",data:projections.mid.map(x=>x.net),color:"#14b8a6"}],projections.mid.map(x=>x.age));
+ document.getElementById("milestones").innerHTML=milestones().map(x=>`<div class="milestone"><div class="micon">${x.icon}</div><div><strong>${x.label}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:"Ikke nådd i modellen"}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join("");
+ document.getElementById("dashboardActions").innerHTML=prioritizedActions().map((a,i)=>`<div class="action"><div class="step">${i+1}</div><div><strong>${a[0]}</strong><div class="sub">${a[1]}</div></div><div class="good" style="font-weight:850">${a[2]}</div></div>`).join("")
+}
+function renderBudget(){
+ const t=totals();
+ document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);
+ document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);
+ document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");
+ setVal("netIncome",state.profile.netIncome);setVal("buffer",state.profile.buffer);setVal("adults",state.profile.adults);setVal("children",state.profile.children);
+ setVal("hasCar",state.profile.hasCar?"yes":"no");setVal("ownsHome",state.profile.ownsHome?"yes":"no");
+ setVal("annualTravel",state.annual.travel);setVal("annualGifts",state.annual.gifts);setVal("annualHealth",state.annual.health);setVal("annualMaintenance",state.annual.maintenance);
+ document.getElementById("annualMonthly").textContent="Månedlig avsetning: "+fmtNok(t.annual);
+ renderBudgetTable();drawBudgetChart();
+ document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")
+}
+function renderBudgetTable(){
+ const body=document.getElementById("budgetBody"),focus=document.activeElement,focusKey=focus?.dataset?.key,selStart=focus?.selectionStart;
+ body.innerHTML=state.budget.map((r,i)=>`<tr class="${r.linked?"row-linked":""}"><td><input data-key="name-${i}" value="${escapeHtml(r.name)}" ${r.linked?"readonly":""} oninput="updateBudgetField(${i},'name',this.value,this)"></td><td><input data-key="amount-${i}" type="number" value="${r.amount}" oninput="updateBudgetField(${i},'amount',this.value,this)"></td><td class="pct-${i}">${fmtPct(r.amount/Math.max(1,state.profile.netIncome))}</td><td><select data-key="type-${i}" ${r.linked?"disabled":""} onchange="updateBudgetField(${i},'type',this.value,this)"><option value="fixed" ${r.type==="fixed"?"selected":""}>Fast</option><option value="variable" ${r.type==="variable"?"selected":""}>Variabel</option><option value="saving" ${r.type==="saving"?"selected":""}>Sparing</option></select></td><td>${r.linked?"🔗":`<button class="danger" onclick="removeBudgetRow(${i})">×</button>`}</td></tr>`).join("");
+ const t=totals();document.getElementById("budgetSum").textContent=fmtNok(t.total);document.getElementById("budgetPct").textContent=fmtPct(t.total/Math.max(1,state.profile.netIncome));
+ if(focusKey){const n=document.querySelector(`[data-key="${focusKey}"]`);if(n){n.focus();if(typeof selStart==="number"&&n.setSelectionRange)try{n.setSelectionRange(selStart,selStart)}catch(e){}}}
+}
+function updateBudgetField(i,key,value,el){
+ const r=state.budget[i];if(!r)return;r[key]=key==="amount"?Math.max(0,Number(value)||0):value;
+ if(r.linked&&key==="amount")state.life.monthlyInvestment=r.amount;
+ const pct=document.querySelector(`.pct-${i}`);if(pct)pct.textContent=fmtPct(r.amount/Math.max(1,state.profile.netIncome));
+ const t=totals();document.getElementById("budgetSum").textContent=fmtNok(t.total);document.getElementById("budgetPct").textContent=fmtPct(t.total/Math.max(1,state.profile.netIncome));
+ renderAllExceptTable();saveState()
+}
+function renderAllExceptTable(){recalc();renderDashboard();drawBudgetChart();renderFuture();renderDecisions();renderSettings();const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")}
+function addBudgetRow(){state.budget.splice(Math.max(0,state.budget.length-1),0,{id:"custom"+Date.now(),name:"Ny post",amount:0,type:"variable"});renderBudget();saveState()}
+function removeBudgetRow(i){if(state.budget[i]?.linked)return;state.budget.splice(i,1);renderAll()}
+function addRecommendedZeroRows(){
+ const rec=[["health","Helse og tannlege"],["clothing","Klær og sko"],["travel","Ferie og reise"],["gifts","Gaver og høytider"],["homeMaintenance","Boligvedlikehold og innbo"],["vehicle","Bilhold og vedlikehold"],["bufferSaving","Buffersparing"],["education","Kompetanse og kurs"],["electronics","Elektronikk"]];
+ rec.forEach(([id,name])=>{if(!state.budget.some(x=>x.id===id))state.budget.splice(Math.max(0,state.budget.length-1),0,{id,name,amount:0,type:id==="bufferSaving"?"saving":"variable"})});
+ renderAll();toast("Anbefalte poster er lagt til")
+}
+function drawBudgetChart(){
+ const t=totals(),data=[["Faste",t.fixed,"#15803d"],["Variable",t.variable,"#dc2626"],["Årlige",t.annual,"#d97706"],["Investering",t.investment,"#2563eb"],["Til overs",Math.max(0,t.remaining),"#14b8a6"]].filter(x=>x[1]>0);
+ drawDonut("budgetChart",data,state.profile.netIncome);
+ document.getElementById("budgetLegend").innerHTML=data.map(x=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${x[2]};margin-right:7px"></span>${x[0]}</span><strong>${fmtNok(x[1])}</strong></div>`).join("")
+}
+function renderFuture(){
+ const mode=document.getElementById("futureMode")?.value||"nominal",labels=projections.mid.map(x=>x.age),series=[];
+ if(mode==="nominal"){series.push({name:"Konservativ",data:projections.low.map(x=>x.net),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.net),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.net),color:"#2563eb"})}
+ else if(mode==="real"){series.push({name:"Konservativ",data:projections.low.map(x=>x.real),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.real),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.real),color:"#2563eb"})}
+ else{series.push({name:"Portefølje",data:projections.mid.map(x=>x.port),color:"#14b8a6"},{name:"Pensjon",data:projections.mid.map(x=>x.pension),color:"#8b5cf6"},{name:"Boligkapital",data:projections.mid.map(x=>x.equity),color:"#d97706"})}
+ drawLineChart("futureChart",series,labels);
+ document.getElementById("timeline").innerHTML=milestones().map(x=>`<div class="time-card"><div style="font-size:22px">${x.icon}</div><strong>${x.label}</strong><div class="big" style="font-size:28px;margin-top:14px">${x.row?x.row.year:"–"}</div><div class="sub">${x.row?x.row.age+" år":"Ikke nådd"}</div></div>`).join("");
+ document.getElementById("forecastBody").innerHTML=projections.mid.map(r=>`<tr><td>${r.year} / ${r.age}</td><td>${fmtNok(r.salary)}</td><td>${fmtNok(r.monthly)}</td><td>${fmtNok(r.port)}</td><td>${fmtNok(r.pension)}</td><td>${fmtNok(r.equity)}</td><td>${fmtNok(r.net)}</td><td>${fmtNok(r.real)}</td></tr>`).join("")
+}
+function renderDecisions(){
+ const l=state.life,last=projections.mid.at(-1),years=l.retireAge-l.startAge;
+ setVal("decisionInvestment",getVal("decisionInvestment",l.monthlyInvestment));setVal("decisionInvestmentRange",getVal("decisionInvestment",l.monthlyInvestment));
+ setVal("decisionHomeValue",getVal("decisionHomeValue",l.homeValue));setVal("decisionMortgage",getVal("decisionMortgage",l.mortgage));
+ const alt=Number(document.getElementById("decisionInvestment").value)||0,diff=alt-l.monthlyInvestment,fv=futureValueMonthly(diff,l.retMid/100,years);
+ document.getElementById("decisionInvestmentResult").textContent=(fv>=0?"+":"")+fmtNok(fv);
+ document.getElementById("decisionInvestmentResult").className="decision-result "+(fv>=0?"good":"bad");
+ document.getElementById("decisionInvestmentTime").textContent=Math.abs(diff)<1?"Samme som planen":`${diff>0?"Høyere":"Lavere"} investering enn planen`;
+ const purchase=Number(document.getElementById("decisionPurchase").value)||0;document.getElementById("decisionPurchaseResult").textContent="−"+fmtNok(purchase*Math.pow(1+l.retMid/100,years));
+ const newHome=Number(document.getElementById("decisionHomeValue").value)||l.homeValue,newLoan=Number(document.getElementById("decisionMortgage").value)||l.mortgage;
+ const homeDiff=(newHome-newLoan)-(l.homeValue-l.mortgage);document.getElementById("decisionHomeResult").textContent=(homeDiff>=0?"+":"")+fmtNok(homeDiff);
+ renderRatePanels()
+}
+function renderRatePanels(){
+ const m=mortgageData(),html=`<div class="grid3"><div><div class="eyebrow">Termin nå</div><strong>${fmtNok(m.current)}</strong></div><div><div class="eyebrow">Ved ${fmtPct(m.stressRate)}</div><strong>${fmtNok(m.stress)}</strong></div><div><div class="eyebrow">Igjen</div><strong class="${m.stressRemaining>=0?"good":"bad"}">${fmtNok(m.stressRemaining)}</strong></div></div><div style="margin-top:14px"><strong>Budsjettet går omtrent i null ved ${fmtPct(m.maxRate)} rente</strong><div class="progress" style="margin-top:8px"><span style="width:${Math.min(100,m.maxRate/.15*100)}%"></span></div></div>`;
+ document.getElementById("decisionRatePanel").innerHTML=html;document.getElementById("settingsRatePanel").innerHTML=html
+}
+function renderSettings(){
+ const ids=["startAge","retireAge","startYear","salary","salaryGrowth","raiseShare","bonus","ipsAnnual","otpRate","portfolioStart","ipsStart","otpStart","homeValue","mortgage","homeGrowth","annualPrincipal","mortgageRate","loanYears","loanType","inflation","retLow","retMid","retHigh"];
+ ids.forEach(id=>setVal(id,state.life[id]));
+ setVal("includeHome",state.life.includeHome?"yes":"no");setVal("goalBufferMonths",state.profile.goalBufferMonths);setVal("goalInvestmentRate",state.profile.goalInvestmentRate);
+ setVal("budgetMortgagePayment",state.budget.find(x=>x.id==="mortgage")?.amount||0);renderRatePanels()
+}
+function setVal(id,v){const e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=v}
+function getVal(id,fallback){const e=document.getElementById(id);return e&&e.value!==""?Number(e.value):fallback}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+function showPage(id){
+ state.ui.page=id;document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===id));
+ document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===id));saveState();
+ setTimeout(()=>{if(id==="dashboard")renderDashboard();if(id==="budget")drawBudgetChart();if(id==="future")renderFuture()},20)
+}
+function bindInputs(){
+ document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
+ const lifeIds=["startAge","retireAge","startYear","salary","salaryGrowth","raiseShare","bonus","ipsAnnual","otpRate","portfolioStart","ipsStart","otpStart","homeValue","mortgage","homeGrowth","annualPrincipal","mortgageRate","loanYears","loanType","inflation","retLow","retMid","retHigh"];
+ lifeIds.forEach(id=>document.getElementById(id)?.addEventListener("input",e=>{state.life[id]=e.target.type==="number"?Number(e.target.value)||0:e.target.value;if(id==="mortgage"){const row=state.budget.find(x=>x.id==="mortgage");}renderAll()}));
+ document.getElementById("includeHome").addEventListener("change",e=>{state.life.includeHome=e.target.value==="yes";renderAll()});
+ [["netIncome","netIncome"],["buffer","buffer"],["adults","adults"],["children","children"]].forEach(([id,key])=>document.getElementById(id).addEventListener("input",e=>{state.profile[key]=Number(e.target.value)||0;renderAll()}));
+ document.getElementById("hasCar").addEventListener("change",e=>{state.profile.hasCar=e.target.value==="yes";renderAll()});document.getElementById("ownsHome").addEventListener("change",e=>{state.profile.ownsHome=e.target.value==="yes";renderAll()});
+ [["annualTravel","travel"],["annualGifts","gifts"],["annualHealth","health"],["annualMaintenance","maintenance"]].forEach(([id,key])=>document.getElementById(id).addEventListener("input",e=>{state.annual[key]=Number(e.target.value)||0;renderAll()}));
+ document.getElementById("goalBufferMonths").addEventListener("input",e=>{state.profile.goalBufferMonths=Number(e.target.value)||0;renderAll()});document.getElementById("goalInvestmentRate").addEventListener("input",e=>{state.profile.goalInvestmentRate=Number(e.target.value)||0;renderAll()});
+ document.getElementById("budgetMortgagePayment").addEventListener("input",e=>{const r=state.budget.find(x=>x.id==="mortgage");if(r)r.amount=Number(e.target.value)||0;renderAll()});
+ document.getElementById("futureMode").addEventListener("change",renderFuture);
+ document.getElementById("decisionInvestment").addEventListener("input",e=>{document.getElementById("decisionInvestmentRange").value=e.target.value;renderDecisions()});document.getElementById("decisionInvestmentRange").addEventListener("input",e=>{document.getElementById("decisionInvestment").value=e.target.value;renderDecisions()});
+ ["decisionPurchase","decisionHomeValue","decisionMortgage"].forEach(id=>document.getElementById(id).addEventListener("input",renderDecisions));
+ document.getElementById("importFile").addEventListener("change",importData)
+}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="okonomisk-fremtid-backup.json";a.click();URL.revokeObjectURL(a.href)}
+async function importData(e){try{const x=JSON.parse(await e.target.files[0].text());state={...clone(defaultState),...x};renderAll();toast("Data importert")}catch(err){toast("Import feilet")}}
+function resetAll(){if(confirm("Tilbakestille alle data?")){state=clone(defaultState);localStorage.removeItem(STORAGE);renderAll();toast("Tilbakestilt")}}
+
+function drawLineChart(id,series,labels){
+ const c=document.getElementById(id);if(!c)return;const rect=c.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(300,rect.width),h=Math.max(240,rect.height);c.width=w*dpr;c.height=h*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const pad={l:72,r:20,t:38,b:48},vals=series.flatMap(s=>s.data),max=Math.max(...vals,1)*1.06,X=i=>pad.l+i*(w-pad.l-pad.r)/Math.max(1,labels.length-1),Y=v=>h-pad.b-v/max*(h-pad.t-pad.b);
+ x.font="12px system-ui";x.strokeStyle=getComputedStyle(document.body).getPropertyValue("--line");x.fillStyle=getComputedStyle(document.body).getPropertyValue("--muted");
+ for(let j=0;j<=5;j++){const v=max*j/5,y=Y(v);x.beginPath();x.moveTo(pad.l,y);x.lineTo(w-pad.r,y);x.stroke();x.textAlign="right";x.fillText(v>=1e6?(v/1e6).toFixed(v>=1e7?0:1)+"m":Math.round(v),pad.l-8,y+4)}
+ for(let t=0;t<Math.min(7,labels.length);t++){const i=Math.round(t*(labels.length-1)/(Math.min(7,labels.length)-1));x.textAlign="center";x.fillText(labels[i],X(i),h-20)}
+ series.forEach((s,k)=>{x.strokeStyle=s.color;x.lineWidth=3;x.beginPath();s.data.forEach((v,i)=>i?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v)));x.stroke();x.fillStyle=s.color;x.fillRect(pad.l+k*150,14,18,4);x.fillStyle=getComputedStyle(document.body).getPropertyValue("--text");x.textAlign="left";x.fillText(s.name,pad.l+24+k*150,18)})
+}
+function drawDonut(id,data,total){
+ const c=document.getElementById(id);if(!c)return;const rect=c.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(300,rect.width),h=Math.max(260,rect.height);c.width=w*dpr;c.height=h*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const cx=w/2,cy=h/2,r=Math.min(w,h)*.34,inner=r*.58,sum=data.reduce((s,a)=>s+a[1],0)||1;let a=-Math.PI/2;
+ data.forEach(d=>{const b=a+Math.PI*2*d[1]/sum;x.beginPath();x.arc(cx,cy,r,a,b);x.arc(cx,cy,inner,b,a,true);x.closePath();x.fillStyle=d[2];x.fill();a=b});
+ x.textAlign="center";x.fillStyle=getComputedStyle(document.body).getPropertyValue("--text");x.font="900 24px system-ui";x.fillText(fmtNok(total),cx,cy);x.font="12px system-ui";x.fillStyle=getComputedStyle(document.body).getPropertyValue("--muted");x.fillText("Netto inntekt",cx,cy+23)
+}
+
+applyTheme();bindInputs();recalc();showPage(state.ui.page||"dashboard");renderAll();if(!state.ui.onboarded)setTimeout(()=>openModal("onboardingModal"),250);
+window.addEventListener("resize",()=>{renderDashboard();drawBudgetChart();renderFuture()});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
