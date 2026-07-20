@@ -313,7 +313,7 @@ body.dark .guide-highlight{
   <div class="top-actions">
     <span id="saveStatus" class="sub hide-mobile">Lagret lokalt</span>
     <button class="iconbtn" onclick="toggleTheme()" title="Mørk/lys">◐</button>
-    <button class="iconbtn app-guide-button" onclick="askAppGuide()" title="Forklaring">i <span class="hide-mobile">Forklaring</span></button>
+    <button class="iconbtn app-guide-button" onclick="askAppGuide()" title="Forklaring">i <span class="hide-mobile">❓ Om verktøyet</span></button>
     <button class="iconbtn hide-mobile" onclick="openModal('dataModal')">Data</button>
   </div>
 </header>
@@ -1141,7 +1141,7 @@ function applyRecommendation(rec){
  }else if(a.type==="mortgage"){
    showPage("decisions");
    document.getElementById("eventMonthlyCost").value=a.amount;
-   renderLifeEvents();
+   
    toast("Beløpet er lagt inn for vurdering");
  }else if(a.type==="goal"){
    showPage("goals");
@@ -1403,13 +1403,12 @@ function deleteGoal(id){
 }
 
 function renderAll(){
- recalc();renderDashboard();renderEconomicPulse();renderBudget();renderBudgetGate();renderBudgetComparison();renderFuture();renderDecisions();renderLifeEvents();renderGoals();renderSettings();saveState()
+ recalc();renderDashboard();renderBudget();renderFuture();renderDecisions();renderGoals();renderSettings();saveState()
 }
 function renderDashboard(){
  migrateLegacyGoals();
- renderRecommendations();
  renderReferenceMode();
- renderEconomicPulse();
+ 
  const last=projections.mid.at(-1),h=health(),t=totals(),m=mortgageData(),nw=nowNetWorth();
  document.getElementById("heroFuture").textContent=fmtNok(last.net);
  document.getElementById("heroReal").textContent=fmtNok(last.real)+" i dagens kroner";
@@ -1424,7 +1423,6 @@ function renderDashboard(){
  drawLineChart("dashboardChart",[{name:"Nettoformue",data:projections.mid.map(x=>x.net),color:"#14b8a6"}],projections.mid.map(x=>x.age));
  const ms=milestones();
  document.getElementById("milestones").innerHTML=ms.length?ms.map(x=>`<div class="milestone"><div class="micon">${x.icon||"🎯"}</div><div><strong>${escapeHtml(x.name)}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:(x.pct>=100?"Målet er nådd":"Ikke nådd i modellen")}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join(""):`<div class="empty-state" style="padding:24px"><strong>Du har ikke valgt noen milepæler ennå.</strong><div class="sub" style="margin-top:5px">Opprett mål i fanen Målsettinger.</div><button class="secondary" style="margin-top:12px" onclick="showPage('goals')">Åpne målsettinger</button></div>`;
- document.getElementById("dashboardActions").innerHTML=prioritizedActions().map((a,i)=>`<div class="action"><div class="step">${i+1}</div><div><strong>${a[0]}</strong><div class="sub">${a[1]}</div></div><div class="good" style="font-weight:850">${a[2]}</div></div>`).join("")
 }
 function renderBudget(){
  const t=totals();
@@ -1435,7 +1433,7 @@ function renderBudget(){
  setVal("hasCar",state.profile.hasCar?"yes":"no");setVal("ownsHome",state.profile.ownsHome?"yes":"no");
  setVal("annualTravel",state.annual.travel);setVal("annualGifts",state.annual.gifts);setVal("annualHealth",state.annual.health);setVal("annualMaintenance",state.annual.maintenance);
  document.getElementById("annualMonthly").textContent="Månedlig avsetning: "+fmtNok(t.annual);
- renderBudgetTable();renderBudgetGate();drawBudgetChart();
+ renderBudgetTable();drawBudgetChart();
  document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")
 }
 
@@ -1478,7 +1476,7 @@ function updateBudgetField(i,key,value,el){
  const t=totals();document.getElementById("budgetSum").textContent=fmtNok(t.total);document.getElementById("budgetPct").textContent=fmtPct(t.total/Math.max(1,state.profile.netIncome));
  renderAllExceptTable();saveState()
 }
-function renderAllExceptTable(){recalc();renderDashboard();renderRecommendations();renderEconomicPulse();drawBudgetChart();renderBudgetGate();renderBudgetComparison();renderFuture();renderDecisions();renderLifeEvents();renderGoals();renderSettings();const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")}
+function renderAllExceptTable(){recalc();renderDashboard();renderRecommendations();drawBudgetChart();renderFuture();renderDecisions();renderGoals();renderSettings();const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")}
 function addBudgetRow(){state.budget.splice(Math.max(0,state.budget.length-1),0,{id:"custom"+Date.now(),name:"Ny post",amount:0,type:"variable"});renderBudget();saveState()}
 function removeBudgetRow(i){if(state.budget[i]?.linked)return;state.budget.splice(i,1);renderAll()}
 function addRecommendedZeroRows(){
@@ -1492,6 +1490,7 @@ function drawBudgetChart(){
  document.getElementById("budgetLegend").innerHTML=data.map(x=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${x[2]};margin-right:7px"></span>${x[0]}</span><strong>${fmtNok(x[1])}</strong></div>`).join("")
 }
 function renderFuture(){
+ if(!projections.mid||!projections.low||!projections.high)recalc();
  const mode=document.getElementById("futureMode")?.value||"nominal",labels=projections.mid.map(x=>x.age),series=[];
  if(mode==="nominal"){series.push({name:"Konservativ",data:projections.low.map(x=>x.net),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.net),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.net),color:"#2563eb"})}
  else if(mode==="real"){series.push({name:"Konservativ",data:projections.low.map(x=>x.real),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.real),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.real),color:"#2563eb"})}
@@ -1504,6 +1503,7 @@ function renderFuture(){
  document.getElementById("forecastBody").innerHTML=visibleRows.map(r=>`<tr class="${r.age%5===0?'forecast-milestone':''}"><td>${r.year} / ${r.age}</td><td>${fmtNok(r.salary)}</td><td>${fmtNok(r.monthly)}</td><td>${fmtNok(r.port)}</td><td>${fmtNok(r.pension)}</td><td>${fmtNok(r.equity)}</td><td class="forecast-net">${fmtNok(r.net)}</td><td class="forecast-real">${fmtNok(r.real)}</td></tr>`).join("")
 }
 function renderDecisions(){
+ if(!projections.mid)recalc();
  const l=state.life,last=projections.mid.at(-1),years=l.retireAge-l.startAge;
  setVal("decisionInvestment",getVal("decisionInvestment",l.monthlyInvestment));setVal("decisionInvestmentRange",getVal("decisionInvestment",l.monthlyInvestment));
  setVal("decisionHomeValue",getVal("decisionHomeValue",l.homeValue));setVal("decisionMortgage",getVal("decisionMortgage",l.mortgage));
@@ -1553,13 +1553,15 @@ let guideRunning=false;
 
 function activatePageWithoutGuide(id){
  state.ui.page=id;
+ recalc();
+
  document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===id));
  document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===id));
 
- if(id==="dashboard")renderDashboard();
- if(id==="budget"){renderBudget();renderBudgetGate();drawBudgetChart();renderBudgetComparison();}
+ if(id==="dashboard"){renderDashboard();renderRecommendations();}
+ if(id==="budget"){renderBudget();drawBudgetChart();}
  if(id==="future")renderFuture();
- if(id==="decisions"){renderDecisions();renderLifeEvents();}
+ if(id==="decisions")renderDecisions();
  if(id==="goals")renderGoals();
  if(id==="settings")renderSettings();
 
@@ -1596,6 +1598,7 @@ function clearGuideHighlight(){
  document.querySelectorAll(".guide-highlight").forEach(el=>{el.classList.remove("guide-highlight");el.style.pointerEvents="";});
 }
 function closeActiveGuide(){
+ if(goalsGuideTimer){clearTimeout(goalsGuideTimer);goalsGuideTimer=null;}
  clearGuideHighlight();
  document.getElementById("coachOverlay").classList.remove("open");
  guideRunning=false;
@@ -1635,10 +1638,20 @@ function renderCoachStep(){
  }));
 }
 
+let goalsGuideTimer=null;
 function showPage(id){
+ if(goalsGuideTimer){
+   clearTimeout(goalsGuideTimer);
+   goalsGuideTimer=null;
+ }
+
  activatePageWithoutGuide(id);
+
  if(id==="goals"&&!state.ui.goalsGuideSeen&&!guideRunning){
-   setTimeout(startGoalsGuide,350);
+   goalsGuideTimer=setTimeout(()=>{
+     goalsGuideTimer=null;
+     if(state.ui.page==="goals"&&!guideRunning)startGoalsGuide();
+   },700);
  }
 }
 function bindInputs(){
@@ -1659,7 +1672,7 @@ function bindInputs(){
  document.getElementById("budgetMortgagePayment").addEventListener("input",e=>{const r=state.budget.find(x=>x.id==="mortgage");if(r)r.amount=Number(e.target.value)||0;renderAll()});
  document.getElementById("futureMode").addEventListener("change",renderFuture);
  document.getElementById("forecastInterval").addEventListener("change",renderFuture);
- document.getElementById("compareSource").addEventListener("change",renderBudgetComparison);["eventIncomeShare","eventMonthlyCost","eventTemporaryInvestment","eventTemporaryMonths","eventLumpSum"].forEach(id=>document.getElementById(id)?.addEventListener("input",renderLifeEvents));
+ 
  document.getElementById("goalMetric").addEventListener("change",updateGoalPreview);
  document.getElementById("goalTarget").addEventListener("input",updateGoalPreview);
  document.getElementById("decisionInvestment").addEventListener("input",e=>{document.getElementById("decisionInvestmentRange").value=e.target.value;renderDecisions()});document.getElementById("decisionInvestmentRange").addEventListener("input",e=>{document.getElementById("decisionInvestment").value=e.target.value;renderDecisions()});
