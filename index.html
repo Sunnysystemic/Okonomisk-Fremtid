@@ -262,6 +262,13 @@ body.dark .guide-highlight{
 .health-row .progress{height:9px}
 .health-row strong{text-align:right;font-size:12px}
 .health-explain{margin-top:12px;padding:11px 12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.actionable{cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+.actionable:hover{transform:translateY(-1px);border-color:rgba(20,184,166,.55);box-shadow:0 8px 20px rgba(15,118,110,.10)}
+.actionable:focus-visible{outline:3px solid rgba(20,184,166,.3);outline-offset:3px}
+.health-row.actionable{width:100%;padding:4px 0;border:0;background:transparent;color:inherit;text-align:left;font:inherit}
+.health-row.actionable:hover{transform:none;background:rgba(20,184,166,.06)}
+.edit-highlight{animation:editPulse 1.25s ease 2;outline:3px solid rgba(250,204,21,.6)!important;outline-offset:4px}
+@keyframes editPulse{50%{box-shadow:0 0 0 8px rgba(250,204,21,.14)}}
 @media(max-width:700px){
  .health-row{grid-template-columns:86px 1fr 42px}
 }
@@ -309,9 +316,13 @@ body.dark .guide-highlight{
 .app-notice.visible{display:block}
 .pulse-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .pulse-item{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel2)}
+.pulse-item.actionable{width:100%;color:inherit;text-align:left;font:inherit}
+.pulse-item.actionable .sub{display:block}
 .pulse-item .pulse-label{display:flex;align-items:center;gap:7px;font-weight:850;margin-bottom:5px}
 .pulse-dot{width:9px;height:9px;border-radius:50%;background:var(--brand)}
 .pulse-item.good .pulse-dot{background:var(--green)}.pulse-item.warn .pulse-dot{background:var(--gold)}.pulse-item.bad .pulse-dot{background:var(--red)}
+.insight.actionable{width:100%;color:inherit;text-align:left;font:inherit}
+.insight.actionable .sub{display:block}
 @media(max-width:760px){
  .compare-grid{grid-template-columns:1fr 1fr}
  .compare-row{grid-template-columns:1fr auto}
@@ -362,12 +373,12 @@ body.dark .guide-highlight{
   </div>
 
   <div class="hero" id="dashboardOverview">
-    <div class="card hero-card" id="dashboardFutureCard">
+    <div class="card hero-card actionable" id="dashboardFutureCard" data-edit-target="future" role="button" tabindex="0" aria-label="Åpne Fremtid">
       <div class="reference-mode-badge" id="referenceModeBadge">Norsk referansehusholdning 2026</div><div class="eyebrow" style="margin-top:12px">Forventet nettoformue ved pensjon</div>
       <div id="heroFuture" class="big">–</div>
       <div id="heroReal" class="sub">– i dagens kroner</div>
       <div style="margin-top:24px">
-        <div class="sub">Fremdrift mot ditt første valgte mål</div>
+        <div class="sub" id="heroProgressLabel">Fremdrift mot ditt første valgte mål</div>
         <div class="progress" style="margin-top:8px"><span id="heroProgress" style="width:0%"></span></div>
       </div>
     </div>
@@ -385,18 +396,18 @@ body.dark .guide-highlight{
   </div>
 
   <div class="kpis">
-    <div class="kpi"><div class="eyebrow">Nettoformue nå</div><div id="kpiNetWorth" class="value">–</div><div class="sub">Bolig, investering og pensjon</div></div>
-    <div class="kpi"><div class="eyebrow">Månedlig investering</div><div id="kpiInvestment" class="value">–</div><div class="sub">Koblet til budsjettet</div></div>
-    <div class="kpi"><div class="eyebrow">Kontantstrøm</div><div id="kpiCashflow" class="value">–</div><div class="sub">Etter alle registrerte poster</div></div>
-    <div class="kpi"><div class="eyebrow">Rentetålighet</div><div id="kpiRateTolerance" class="value">–</div><div class="sub">Omtrentlig rente før null</div></div>
+    <div class="kpi actionable" data-edit-target="networth" role="button" tabindex="0"><div class="eyebrow">Nettoformue nå</div><div id="kpiNetWorth" class="value">–</div><div class="sub">Klikk for å endre startverdier</div></div>
+    <div class="kpi actionable" data-edit-target="investment" role="button" tabindex="0"><div class="eyebrow">Månedlig investering</div><div id="kpiInvestment" class="value">–</div><div class="sub">Klikk for å endre i budsjettet</div></div>
+    <div class="kpi actionable" data-edit-target="budget" role="button" tabindex="0"><div class="eyebrow">Kontantstrøm</div><div id="kpiCashflow" class="value">–</div><div class="sub">Klikk for å åpne budsjettet</div></div>
+    <div class="kpi actionable" data-edit-target="mortgage" role="button" tabindex="0"><div class="eyebrow">Rentetålighet</div><div id="kpiRateTolerance" class="value">–</div><div class="sub">Klikk for å endre lån og rente</div></div>
   </div>
 
   <div class="grid2">
-    <div class="card">
+    <div class="card actionable" data-edit-target="future" role="button" tabindex="0">
       <div class="section-title"><div><h3>Formuesutvikling</h3><div class="sub">Forventet scenario</div></div><span class="badge">Interaktiv</span></div>
       <div class="chartbox"><canvas id="dashboardChart"></canvas></div>
     </div>
-    <div class="card">
+    <div class="card actionable" data-edit-target="goals" role="button" tabindex="0">
       <div class="section-title"><div><h3>Neste milepæler</h3><div class="sub">Hva planen kan føre til</div></div></div>
       <div id="milestones"></div>
     </div>
@@ -491,6 +502,7 @@ body.dark .guide-highlight{
 
 <section id="future" class="page">
   <div class="section-title"><div><h2>Fremtid</h2><div class="sub">Hvordan økonomien utvikler seg over livet</div></div></div>
+  <div id="futureReferenceBanner" class="reference-banner"></div>
   <div class="card">
     <div class="section-title">
       <div><h3>Nettoformue</h3><div class="sub">Konservativt, forventet og sterkt scenario</div></div>
@@ -602,7 +614,7 @@ body.dark .guide-highlight{
 
   <div class="card" style="margin-top:16px" id="planMilestonesCard">
     <div class="section-title">
-      <div><h3>Neste milepæler</h3><div class="sub">De nærmeste målene du faktisk har valgt</div></div>
+      <div><h3>Neste milepæler</h3><div class="sub" id="planMilestonesSubtitle">De nærmeste målene du faktisk har valgt</div></div>
     </div>
     <div id="planMilestones"></div>
   </div>
@@ -664,7 +676,9 @@ body.dark .guide-highlight{
   </div>
   <div class="card" style="margin-top:16px">
     <div class="section-title"><div><h3>Data og personvern</h3>
-    <p class="sub"><strong>Referansegrunnlag:</strong> SSBs Forbruksundersøkelse 2022 er prisjustert med KPI fra 89,2 i 2022 til 102,8 i juni 2026. Median husholdningsinntekt etter skatt fra 2024 er tilsvarende prisjustert til juni 2026. Postene er fordelte underkategorier og skal brukes som startpunkt, ikke som fasit.</p><div class="sub">Alt lagres lokalt på denne enheten</div></div></div>
+    <p class="sub"><strong>Referansegrunnlag:</strong> Standardprofilen kombinerer de nyeste relevante SSB-tallene med tydelig merkede modellantakelser. Den bruker median husholdningsinntekt etter skatt, gjennomsnittlig husholdningsstørrelse, boutgifter, boligverdi, gjeld, boliglånsrente og finansiell sparing. Buffer, alder og langsiktig avkastning er nøytrale modellantakelser fordi ett representativt gjennomsnitt ikke finnes.</p>
+    <details style="margin:12px 0"><summary style="cursor:pointer;font-weight:850">Se tallene bak norsk referanseprofil</summary><div class="sub" style="margin-top:10px;line-height:1.65">Inntekt: 676 100 kr etter skatt i 2024, prisjustert til 2026. Husholdning: 2,1 personer. Boutgifter: 178 912 kr i 2025. Primærbolig: 4 576 100 kr og gjeld: 2 071 800 kr i 2024 for husholdninger med beløp. Boliglånsrente: 5,08 % i mai 2026. Finansiell investering: 4,2 % av disponibel inntekt i 2025. Gjennomsnittlig OTP-sats: 4 % i 2025. Startalder 42 år, én måneds buffer, 2 % inflasjon og avkastningsscenarioene er modellforutsetninger – ikke SSB-gjennomsnitt.</div></details>
+    <div class="sub">Alt lagres lokalt på denne enheten</div></div></div>
     <div class="small-actions">
       <button class="secondary" onclick="exportData()">Eksporter sikkerhetskopi</button>
       <label class="secondary" style="cursor:pointer">Importer<input id="importFile" type="file" accept=".json" hidden></label>
@@ -764,7 +778,7 @@ body.dark .guide-highlight{
     <p class="sub">Appen lagrer kun data lokalt på enheten din. Appen starter med en statistisk norsk referansehusholdning for 2026. Erstatt verdiene med dine egne for å gjøre vurderingen personlig.</p>
     <div class="form-grid" style="margin-top:16px">
       <div class="field"><label>Netto månedslønn</label><input id="onboardIncome" type="number" value="59650"></div>
-      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="3103"></div>
+      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="2505"></div>
       <div class="field"><label>Alder</label><input id="onboardAge" type="number" value="42"></div>
       <div class="field"><label>Ønsket pensjonsalder</label><input id="onboardRetire" type="number" value="67"></div>
     </div>
@@ -781,7 +795,7 @@ body.dark .guide-highlight{
 const fmtNok=n=>new Intl.NumberFormat("nb-NO",{style:"currency",currency:"NOK",maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct=n=>new Intl.NumberFormat("nb-NO",{style:"percent",maximumFractionDigits:1}).format(Number(n)||0);
 const clone=o=>JSON.parse(JSON.stringify(o));
-const SCHEMA_VERSION=2;
+const SCHEMA_VERSION=3;
 const STORAGE="okonomiskFremtid_v2";
 const LEGACY_STORAGE="okonomiskFremtidPWA_v1";
 const VALID_PAGES=new Set(["dashboard","budget","future","decisions","goals","settings"]);
@@ -791,11 +805,11 @@ const defaultState={
  version:SCHEMA_VERSION,
  ui:{theme:"light",page:"dashboard",referenceMode:true,onboarded:false,appGuideSeen:false,goalsGuideSeen:false,goalSuggestionsDismissed:false,recommendationState:{completed:[],dismissed:[]}},
  life:{
-  startAge:42,retireAge:67,startYear:2026,salary:715800,salaryGrowth:5,raiseShare:50,
-  monthlyInvestment:3103,bonus:0,ipsAnnual:0,otpRate:2,
-  portfolioStart:0,ipsStart:0,otpStart:0,
-  includeHome:false,homeValue:0,mortgage:0,homeGrowth:2,annualPrincipal:0,
-  mortgageRate:5.0,loanYears:25,loanType:"annuity",
+  startAge:42,retireAge:67,startYear:2026,salary:744840,salaryGrowth:3,raiseShare:4.2,
+  monthlyInvestment:2505,bonus:0,ipsAnnual:0,otpRate:4,
+  portfolioStart:91000,ipsStart:0,otpStart:0,
+  includeHome:true,homeValue:4576100,mortgage:2071800,homeGrowth:2,annualPrincipal:44000,
+  mortgageRate:5.08,loanYears:25,loanType:"annuity",
   inflation:2,retLow:7,retMid:9,retHigh:11
  },
  profile:{netIncome:59650,buffer:53266,adults:2,children:0,ownsHome:true,hasCar:true,goalBufferMonths:3,goalInvestmentRate:15},
@@ -826,7 +840,7 @@ const defaultState={
   {id:"gifts",name:"Gaver og høytider",amount:700,reference2026:700,type:"variable"},
   {id:"misc",name:"Andre varer og tjenester",amount:440,reference2026:440,type:"variable"},
   {id:"studentLoan",name:"Studielån",amount:0,reference2026:0,type:"fixed"},
-  {id:"investment",name:"Investering",amount:3103,reference2026:3103,type:"saving",linked:true},
+  {id:"investment",name:"Investering",amount:2505,reference2026:2505,type:"saving",linked:true},
   {id:"bufferSaving",name:"Buffersparing",amount:0,reference2026:0,type:"saving"}
  ]
 };
@@ -835,10 +849,15 @@ let projections={};
 
 
 function completeOnboarding(){
- state.profile.netIncome=Math.max(0,Number(document.getElementById("onboardIncome").value)||0);
- state.life.monthlyInvestment=Math.max(0,Number(document.getElementById("onboardInvestment").value)||0);
- state.life.startAge=Math.max(18,Number(document.getElementById("onboardAge").value)||30);
- state.life.retireAge=Math.max(state.life.startAge+1,Number(document.getElementById("onboardRetire").value)||67);
+ const income=Math.max(0,Number(document.getElementById("onboardIncome").value)||0);
+ const investment=Math.max(0,Number(document.getElementById("onboardInvestment").value)||0);
+ const age=Math.max(18,Number(document.getElementById("onboardAge").value)||30);
+ const retire=Math.max(age+1,Number(document.getElementById("onboardRetire").value)||67);
+ state.profile.netIncome=income;
+ state.life.monthlyInvestment=investment;
+ state.life.startAge=age;
+ state.life.retireAge=retire;
+ state.ui.referenceMode=income===defaultState.profile.netIncome&&investment===defaultState.life.monthlyInvestment&&age===defaultState.life.startAge&&retire===defaultState.life.retireAge;
  const inv=state.budget.find(x=>x.linked);if(inv)inv.amount=state.life.monthlyInvestment;
  state.ui.onboarded=true;closeModal("onboardingModal");renderAll();saveState();setTimeout(startAppGuide,320);
 }
@@ -884,7 +903,19 @@ function normalizeState(raw){
  Object.keys(defaultState.life).forEach(key=>{if(typeof defaultState.life[key]==="number")normalized.life[key]=finiteNumber(normalized.life[key],defaultState.life[key])});
  Object.keys(defaultState.profile).forEach(key=>{if(typeof defaultState.profile[key]==="number")normalized.profile[key]=finiteNumber(normalized.profile[key],defaultState.profile[key])});
  Object.keys(defaultState.annual).forEach(key=>normalized.annual[key]=Math.max(0,finiteNumber(normalized.annual[key],defaultState.annual[key])));
- if(sourceVersion<2&&normalized.ui.referenceMode)normalized.profile.buffer=defaultState.profile.buffer;
+ if(sourceVersion<3&&normalized.ui.referenceMode){
+  const savedBudget=Array.isArray(source.budget)?source.budget:[];
+  const budgetWasEdited=savedBudget.some(row=>row&&finiteNumber(row.reference2026,0)>0&&Math.abs(finiteNumber(row.amount)-finiteNumber(row.reference2026))>1);
+  const onboardingWasEdited=finiteNumber(source.profile?.netIncome,59650)!==59650||finiteNumber(source.life?.monthlyInvestment,3103)!==3103||finiteNumber(source.life?.startAge,42)!==42||finiteNumber(source.life?.retireAge,67)!==67;
+  if(budgetWasEdited||onboardingWasEdited){
+   normalized.ui.referenceMode=false;
+  }else{
+   normalized.life=clone(defaultState.life);
+   normalized.profile=clone(defaultState.profile);
+   normalized.annual=clone(defaultState.annual);
+   normalized.budget=clone(defaultState.budget);
+  }
+ }
  normalized.life.startAge=Math.max(18,normalized.life.startAge);
  normalized.life.retireAge=Math.max(normalized.life.startAge+1,normalized.life.retireAge);
  normalized.life.monthlyInvestment=Math.max(0,normalized.life.monthlyInvestment);
@@ -977,7 +1008,7 @@ function project(rate){
   port=(port+ordinary+bonus)*(1+rate);ips=(ips+l.ipsAnnual)*(1+rate);otp=(otp+otpIn)*(1+rate);
   if(l.includeHome){home*=1+l.homeGrowth/100;loan=Math.max(0,loan-l.annualPrincipal)}
   price*=1+l.inflation/100;
-  const equity=l.includeHome?home-loan:0,net=port+ips+otp+equity;
+  const equity=l.includeHome?home-loan:0,net=state.profile.buffer+port+ips+otp+equity;
   rows.push({year:l.startYear+i,age:l.startAge+i,salary,monthly,port,ips,otp,pension:ips+otp,home,loan,equity,net,real:net/price});
   const raise=salary*l.salaryGrowth/100;salary+=raise;monthly+=raise*l.raiseShare/100/12;bonus+=bonus*l.salaryGrowth/100*l.raiseShare/100;
  }
@@ -988,7 +1019,7 @@ function recalc(){
  projections.mid=project(state.life.retMid/100);
  projections.high=project(state.life.retHigh/100);
 }
-function nowNetWorth(){const l=state.life;return l.portfolioStart+l.ipsStart+l.otpStart+(l.includeHome?l.homeValue-l.mortgage:0)}
+function nowNetWorth(){const l=state.life;return state.profile.buffer+l.portfolioStart+l.ipsStart+l.otpStart+(l.includeHome?l.homeValue-l.mortgage:0)}
 function health(){
  const t=totals(),m=mortgageData(),income=Math.max(1,state.profile.netIncome);
  const monthlyExpenses=Math.max(1,t.expenses);
@@ -1055,8 +1086,10 @@ function health(){
  return {score,dimensions,issues,advice:adviceMap[lowest.name],lowest:lowest.name};
 }
 function healthRowsHtml(h){
- return h.dimensions.map(d=>`<div class="health-row"><span>${d.name}</span><div class="progress"><span style="width:${d.score/20*100}%"></span></div><strong>${d.score}/20</strong></div>`).join("");
+ return h.dimensions.map(d=>`<button type="button" class="health-row actionable" data-edit-target="${healthEditTarget(d.name)}" aria-label="Endre grunnlaget for ${escapeHtml(d.name)}"><span>${d.name}</span><span class="progress"><span style="width:${d.score/20*100}%"></span></span><strong>${d.score}/20</strong></button>`).join("");
 }
+function healthEditTarget(name){return {"Likviditet":"liquidity","Sparing":"investment","Gjeld":"mortgage","Robusthet":"robustness","Fremtid":"futureSettings"}[name]||"budget"}
+function healthIssuesHtml(){return health().issues.slice(0,6).map(x=>`<button type="button" class="insight ${x[0]} actionable" data-edit-target="${healthEditTarget(x[1])}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><span class="sub">${x[2]}</span></button>`).join("")}
 function openHealthInfo(){
  const h=health();
  document.getElementById("healthModalBreakdown").innerHTML=healthRowsHtml(h)+`<div class="health-explain"><strong>Størst forbedringsmulighet:</strong><div class="sub">${h.advice}</div></div><div class="sub" style="margin-top:10px">Referansevisningen bruker én måneds løpende utgifter som en nøytral likviditetsantakelse. Scoren er ikke en offentlig standard.</div>`;
@@ -1067,11 +1100,11 @@ function renderEconomicPulse(){
  const element=document.getElementById("economicPulse");if(!element)return;
  const t=totals(),m=mortgageData(),monthlyExpenses=Math.max(1,t.expenses),bufferMonths=state.profile.buffer/monthlyExpenses,savingsRate=t.investment/Math.max(1,state.profile.netIncome);
  const signals=[
-  t.remaining>=0?{tone:"good",title:"Kontantstrøm i balanse",text:`${fmtNok(t.remaining)} er igjen etter registrerte poster.`}:{tone:"bad",title:"Negativ kontantstrøm",text:`Budsjettet mangler ${fmtNok(Math.abs(t.remaining))} per måned.`},
-  bufferMonths>=3?{tone:"good",title:"Solid buffer",text:`Bufferen dekker omtrent ${bufferMonths.toFixed(1)} måneder.`}:bufferMonths>=1?{tone:"warn",title:"Buffer under målet",text:`Bufferen dekker omtrent ${bufferMonths.toFixed(1)} måneder.`}:{tone:"bad",title:"Lav likviditet",text:"Bufferen dekker mindre enn én måned."},
-  state.life.mortgage>0?(m.stressRemaining>=0?{tone:"good",title:"Tåler rentestress",text:`Omtrent ${fmtNok(m.stressRemaining)} er igjen ved ${fmtPct(m.stressRate)} rente.`}:{tone:"bad",title:"Sårbar for renteøkning",text:`Budsjettet mangler ${fmtNok(Math.abs(m.stressRemaining))} ved ${fmtPct(m.stressRate)} rente.`}):(savingsRate>=.10?{tone:"good",title:"God investeringsgrad",text:`${fmtPct(savingsRate)} av nettoinntekten investeres.`}:{tone:"warn",title:"Moderat investeringsgrad",text:`${fmtPct(savingsRate)} av nettoinntekten investeres.`})
+  t.remaining>=0?{tone:"good",target:"budget",title:"Kontantstrøm i balanse",text:`${fmtNok(t.remaining)} er igjen etter registrerte poster.`}:{tone:"bad",target:"budget",title:"Negativ kontantstrøm",text:`Budsjettet mangler ${fmtNok(Math.abs(t.remaining))} per måned.`},
+  bufferMonths>=3?{tone:"good",target:"liquidity",title:"Solid buffer",text:`Bufferen dekker omtrent ${bufferMonths.toFixed(1)} måneder.`}:bufferMonths>=1?{tone:"warn",target:"liquidity",title:"Buffer under målet",text:`Bufferen dekker omtrent ${bufferMonths.toFixed(1)} måneder.`}:{tone:"bad",target:"liquidity",title:"Lav likviditet",text:"Bufferen dekker mindre enn én måned."},
+  state.life.mortgage>0?(m.stressRemaining>=0?{tone:"good",target:"mortgage",title:"Tåler rentestress",text:`Omtrent ${fmtNok(m.stressRemaining)} er igjen ved ${fmtPct(m.stressRate)} rente.`}:{tone:"bad",target:"mortgage",title:"Sårbar for renteøkning",text:`Budsjettet mangler ${fmtNok(Math.abs(m.stressRemaining))} ved ${fmtPct(m.stressRate)} rente.`}):(savingsRate>=.10?{tone:"good",target:"investment",title:"God investeringsgrad",text:`${fmtPct(savingsRate)} av nettoinntekten investeres.`}:{tone:"warn",target:"investment",title:"Moderat investeringsgrad",text:`${fmtPct(savingsRate)} av nettoinntekten investeres.`})
  ];
- element.innerHTML=signals.slice(0,3).map(signal=>`<div class="pulse-item ${signal.tone}"><div class="pulse-label"><span class="pulse-dot"></span>${signal.title}</div><div class="sub">${signal.text}</div></div>`).join("");
+ element.innerHTML=signals.slice(0,3).map(signal=>`<button type="button" class="pulse-item ${signal.tone} actionable" data-edit-target="${signal.target}"><span class="pulse-label"><span class="pulse-dot"></span>${signal.title}</span><span class="sub">${signal.text}</span></button>`).join("");
 }
 
 function recommendationState(){
@@ -1269,11 +1302,22 @@ function dismissRecommendation(id){
 }
 function renderRecommendations(){
  const recs=generateRecommendations();
+ const focusCard=document.getElementById("monthlyFocusCard");
+ const rs=recommendationState();
+ const steadyHidden=rs.completed.includes("steady_plan")||rs.dismissed.includes("steady_plan");
+ if(!recs.length&&steadyHidden){
+  recommendationCache=new Map();
+  if(focusCard)focusCard.style.display="none";
+  const secondaryElement=document.getElementById("secondaryRecommendations");
+  if(secondaryElement)secondaryElement.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><strong>Ingen nye anbefalinger akkurat nå.</strong><div class="sub">Du kan fortsatt utforske tiltak i Plan og Beslutninger.</div></div>`;
+  return;
+ }
  const main=recs[0]||{
    id:"steady_plan",title:"Fortsett planen",description:"Økonomien er i balanse. Det viktigste nå er å følge planen over tid.",
    effect:"Stabil fremdrift",healthDelta:0,effort:1,action:{type:"goals"}
  };
  recommendationCache=new Map([main,...recs].map(item=>[item.id,item]));
+ if(focusCard)focusCard.style.display="block";
  const title=document.getElementById("focusTitle");
  if(!title)return;
  title.textContent=main.title;
@@ -1303,15 +1347,15 @@ function renderRecommendations(){
 
 function prioritizedActions(){
  const t=totals(),h=health(),actions=[];
- if(t.remaining<0)actions.push(["Få budsjettet i balanse",`Reduser kostnader eller investering med minst ${fmtNok(Math.abs(t.remaining))}.`,fmtNok(Math.abs(t.remaining))+"/mnd"]);
+ if(t.remaining<0)actions.push(["Få budsjettet i balanse",`Reduser kostnader eller investering med minst ${fmtNok(Math.abs(t.remaining))}.`,fmtNok(Math.abs(t.remaining))+"/mnd","budget"]);
  const bufferGap=state.profile.goalBufferMonths*t.expenses-state.profile.buffer;
- if(bufferGap>0)actions.push(["Bygg buffer",`Prioriter buffer til målet på ${state.profile.goalBufferMonths} måneders utgifter.`,fmtNok(bufferGap)]);
+ if(bufferGap>0)actions.push(["Bygg buffer",`Prioriter buffer til målet på ${state.profile.goalBufferMonths} måneders utgifter.`,fmtNok(bufferGap),"liquidity"]);
  const subs=state.budget.find(x=>x.id==="subscriptions")?.amount||0;
- if(subs>state.profile.netIncome*.03)actions.push(["Gå gjennom abonnement",`Abonnement utgjør ${fmtPct(subs/state.profile.netIncome)} av inntekten.`,"200–600 kr"]);
+ if(subs>state.profile.netIncome*.03)actions.push(["Gå gjennom abonnement",`Abonnement utgjør ${fmtPct(subs/state.profile.netIncome)} av inntekten.`,"200–600 kr","subscriptions"]);
  const ins=state.budget.find(x=>x.id==="insurance")?.amount||0;
- if(ins>state.profile.netIncome*.08)actions.push(["Sammenlign forsikring",`Forsikring utgjør ${fmtPct(ins/state.profile.netIncome)} av nettoinntekten.`,"Mulig kutt"]);
- if(t.remaining>0 && t.investment/state.profile.netIncome<state.profile.goalInvestmentRate/100)actions.push(["Øk investeringen gradvis",`Du har ${fmtNok(t.remaining)} udisponert.`,fmtNok(Math.min(t.remaining,state.profile.netIncome*state.profile.goalInvestmentRate/100-t.investment))]);
- if(!actions.length)actions.push(["Automatiser planen","Budsjettet er robust. Automatiser investering og årlige avsetninger.","Bevar planen"]);
+ if(ins>state.profile.netIncome*.08)actions.push(["Sammenlign forsikring",`Forsikring utgjør ${fmtPct(ins/state.profile.netIncome)} av nettoinntekten.`,"Mulig kutt","insurance"]);
+ if(t.remaining>0 && t.investment/state.profile.netIncome<state.profile.goalInvestmentRate/100)actions.push(["Øk investeringen gradvis",`Du har ${fmtNok(t.remaining)} udisponert.`,fmtNok(Math.min(t.remaining,state.profile.netIncome*state.profile.goalInvestmentRate/100-t.investment)),"investment"]);
+ if(!actions.length)actions.push(["Automatiser planen","Budsjettet er robust. Automatiser investering og årlige avsetninger.","Bevar planen","investment"]);
  return actions.slice(0,3)
 }
 
@@ -1388,11 +1432,23 @@ function goalProgress(goal){
  return Math.max(0,Math.min(100,current/target*100))
 }
 function goalForecast(goal){
- if(goal.metric==="buffer")return metricCurrent("buffer")>=goal.target?projections.mid[0]:null;
+ if(goal.metric==="buffer"){
+  if(metricCurrent("buffer")>=goal.target)return projections.mid[0];
+  const monthlyBuffer=state.budget.find(item=>item.id==="bufferSaving")?.amount||0;
+  const illustrativeMonthly=goal.example&&state.ui.referenceMode?Math.max(0,totals().remaining):0;
+  const monthly=Math.max(0,monthlyBuffer,illustrativeMonthly);
+  if(monthly<=0)return null;
+  const months=Math.ceil((goal.target-metricCurrent("buffer"))/monthly);
+  return projections.mid[Math.min(projections.mid.length-1,Math.ceil(months/12))]||null;
+ }
  return projections.mid.find(row=>goal.metric==="mortgage"?metricFromRow(goal.metric,row)<=goal.target:metricFromRow(goal.metric,row)>=goal.target)
 }
 function milestones(){
- return state.goals.map(goal=>({...goal,pct:goalProgress(goal),row:goalForecast(goal)}))
+ const hasOwnGoals=state.goals.length>0;
+ const source=hasOwnGoals
+  ?state.goals
+  :referenceGoalSuggestions().filter(goal=>["buffer","portfolio","pension"].includes(goal.metric)).map(goal=>({...goal,example:true}));
+ return source.map(goal=>({...goal,pct:goalProgress(goal),row:goalForecast(goal)}))
 }
 function futureValueMonthly(pmt,rate,years){const rm=Math.pow(1+rate,1/12)-1,n=years*12;return rm?pmt*(Math.pow(1+rm,n)-1)/rm:pmt*n}
 
@@ -1458,10 +1514,12 @@ function renderGoals(){
 }
 function renderPlanActions(){
  const e=document.getElementById("planActions");if(!e)return;
- e.innerHTML=prioritizedActions().map((a,i)=>`<div class="action"><div class="step">${i+1}</div><div><strong>${a[0]}</strong><div class="sub">${a[1]}</div></div><div class="good" style="font-weight:850">${a[2]}</div></div>`).join("");
+ e.innerHTML=prioritizedActions().map((a,i)=>`<div class="action actionable" data-edit-target="${a[3]||"budget"}" role="button" tabindex="0" aria-label="Åpne og juster: ${escapeHtml(a[0])}"><div class="step">${i+1}</div><div><strong>${a[0]}</strong><div class="sub">${a[1]} · Klikk for å justere</div></div><div class="good" style="font-weight:850">${a[2]}</div></div>`).join("");
 }
 function renderPlanMilestones(){
  const e=document.getElementById("planMilestones");if(!e)return;
+ const subtitle=document.getElementById("planMilestonesSubtitle");
+ if(subtitle)subtitle.textContent=state.goals.length?"De nærmeste målene du faktisk har valgt":"Illustrative eksempler basert på norsk referansehusholdning 2026";
  const ms=milestones().sort((a,b)=>{
    const ay=a.row?.year??9999,by=b.row?.year??9999;
    return ay-by||b.pct-a.pct;
@@ -1470,7 +1528,7 @@ function renderPlanMilestones(){
    e.innerHTML=`<div class="empty-state" style="padding:24px"><strong>Ingen mål opprettet.</strong><div class="sub">Lag egne mål eller bruk forslagene over.</div></div>`;
    return;
  }
- e.innerHTML=ms.map(x=>`<div class="milestone"><div class="micon">${escapeHtml(x.icon||"🎯")}</div><div><strong>${escapeHtml(x.name)}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:(x.pct>=100?"Målet er nådd":"Ikke nådd i modellen")}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join("");
+ e.innerHTML=ms.map(x=>`<div class="milestone"><div class="micon">${escapeHtml(x.icon||"🎯")}</div><div><strong>${escapeHtml(x.name)}${x.example?` <span class="badge">Eksempel</span>`:""}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:(x.pct>=100?"Målet er nådd":"Ikke nådd i modellen")}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join("");
 }
 function openGoalEditor(id=""){
  const g=state.goals.find(x=>x.id===id);
@@ -1530,17 +1588,21 @@ function renderDashboard(){
  const last=projections.mid.at(-1),h=health(),t=totals(),m=mortgageData(),nw=nowNetWorth();
  document.getElementById("heroFuture").textContent=fmtNok(last.net);
  document.getElementById("heroReal").textContent=fmtNok(last.real)+" i dagens kroner";
- const firstGoal=state.goals[0];document.getElementById("heroProgress").style.width=(firstGoal?goalProgress(firstGoal):0)+"%";
+ const firstMilestone=milestones()[0];
+ document.getElementById("heroProgress").style.width=(firstMilestone?.pct||0)+"%";
+ document.getElementById("heroProgressLabel").textContent=state.goals.length?"Fremdrift mot ditt første valgte mål":"Fremdrift mot et illustrativt eksempel-mål";
  document.getElementById("healthScore").textContent=h.score+"/100";document.getElementById("healthProgress").style.width=h.score+"%";
  document.getElementById("healthText").textContent=h.score>=90?"Svært robust":h.score>=75?"God":h.score>=60?"Stabil, med forbedringspunkter":h.score>=40?"Sårbar":"Kritisk";
  document.getElementById("healthBreakdown").innerHTML=healthRowsHtml(h);
- document.getElementById("topAdvice").innerHTML=`<strong>Raskeste vei videre</strong><div class="sub">${h.advice}</div>`;
+ const topAdvice=document.getElementById("topAdvice");
+ topAdvice.innerHTML=`<strong>Raskeste vei videre</strong><div class="sub">${h.advice}</div><div class="sub" style="margin-top:5px;color:var(--brand);font-weight:800">Klikk for å justere</div>`;
+ topAdvice.classList.add("actionable");topAdvice.dataset.editTarget=healthEditTarget(h.lowest);topAdvice.setAttribute("role","button");topAdvice.tabIndex=0;
  document.getElementById("kpiNetWorth").textContent=fmtNok(nw);document.getElementById("kpiInvestment").textContent=fmtNok(t.investment);
  document.getElementById("kpiCashflow").textContent=fmtNok(t.remaining);document.getElementById("kpiCashflow").className="value "+(t.remaining>=0?"good":"bad");
  document.getElementById("kpiRateTolerance").textContent=fmtPct(m.maxRate);
  drawLineChart("dashboardChart",[{name:"Nettoformue",data:projections.mid.map(x=>x.net),color:"#14b8a6"}],projections.mid.map(x=>x.age));
  const ms=milestones();
- document.getElementById("milestones").innerHTML=ms.length?ms.map(x=>`<div class="milestone"><div class="micon">${escapeHtml(x.icon||"🎯")}</div><div><strong>${escapeHtml(x.name)}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:(x.pct>=100?"Målet er nådd":"Ikke nådd i modellen")}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join(""):`<div class="empty-state" style="padding:24px"><strong>Du har ikke valgt noen milepæler ennå.</strong><div class="sub" style="margin-top:5px">Opprett mål i fanen Plan.</div><button class="secondary" style="margin-top:12px" onclick="showPage('goals')">Åpne Plan</button></div>`;
+ document.getElementById("milestones").innerHTML=ms.map(x=>`<div class="milestone"><div class="micon">${escapeHtml(x.icon||"🎯")}</div><div><strong>${escapeHtml(x.name)}${x.example?` <span class="badge">Eksempel</span>`:""}</strong><div class="progress" style="margin-top:7px"><span style="width:${x.pct}%"></span></div><div class="sub" style="margin-top:5px">${x.row?`Forventet ${x.row.year} · ${x.row.age} år`:(x.pct>=100?"Målet er nådd":"Ikke nådd i modellen")}</div></div><span class="badge">${Math.round(x.pct)}%</span></div>`).join("");
  renderEconomicPulse();
 }
 function renderBudget(){
@@ -1553,7 +1615,7 @@ function renderBudget(){
  setVal("annualTravel",state.annual.travel);setVal("annualGifts",state.annual.gifts);setVal("annualHealth",state.annual.health);setVal("annualMaintenance",state.annual.maintenance);
  document.getElementById("annualMonthly").textContent="Månedlig avsetning: "+fmtNok(t.annual);
  renderBudgetTable();drawBudgetChart();renderBudgetComparison();
- document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")
+ document.getElementById("budgetInsights").innerHTML=healthIssuesHtml()
 }
 
 function referenceDeltaHtml(row){
@@ -1662,7 +1724,7 @@ function updateBudgetField(i,key,value,el){
  const t=totals();document.getElementById("budgetSum").textContent=fmtNok(t.total);document.getElementById("budgetPct").textContent=fmtPct(t.total/Math.max(1,state.profile.netIncome));
  renderAllExceptTable();saveState()
 }
-function renderAllExceptTable(){recalc();renderSafely("Dashboard",renderDashboard);renderSafely("Anbefalinger",renderRecommendations);renderSafely("Budsjettgraf",drawBudgetChart);renderSafely("Budsjettsammenligning",renderBudgetComparison);renderSafely("Fremtid",renderFuture);renderSafely("Beslutninger",renderDecisions);renderSafely("Plan",renderGoals);renderSafely("Innstillinger",renderSettings);const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=health().issues.slice(0,6).map(x=>`<div class="insight ${x[0]}"><strong>${x[0]==="good"?"✓":x[0]==="warn"?"!":"⚠"} ${x[1]}</strong><div class="sub">${x[2]}</div></div>`).join("")}
+function renderAllExceptTable(){recalc();renderSafely("Dashboard",renderDashboard);renderSafely("Anbefalinger",renderRecommendations);renderSafely("Budsjettgraf",drawBudgetChart);renderSafely("Budsjettsammenligning",renderBudgetComparison);renderSafely("Fremtid",renderFuture);renderSafely("Beslutninger",renderDecisions);renderSafely("Plan",renderGoals);renderSafely("Innstillinger",renderSettings);const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=healthIssuesHtml()}
 function addBudgetRow(){state.budget.splice(Math.max(0,state.budget.length-1),0,{id:"custom"+Date.now(),name:"Ny post",amount:0,type:"variable"});renderBudget();saveState()}
 function removeBudgetRow(i){if(state.budget[i]?.linked)return;state.budget.splice(i,1);renderAll()}
 function addRecommendedZeroRows(){
@@ -1677,13 +1739,19 @@ function drawBudgetChart(){
 }
 function renderFuture(){
  if(!projections.mid||!projections.low||!projections.high)recalc();
+ const referenceBanner=document.getElementById("futureReferenceBanner");
+ if(referenceBanner){
+  referenceBanner.innerHTML=state.ui.referenceMode
+   ?`<strong>Norsk referansehusholdning 2026</strong><span>Grafen, tidslinjen og tabellen bruker de samme referanseverdiene som resten av verktøyet. Milepælene er illustrative eksempler til du lager egne mål i Plan.</span>`
+   :`<strong>Din økonomiske plan</strong><span>Grafen, tidslinjen og tabellen er beregnet fra verdiene og målene du har registrert.</span>`;
+ }
  const mode=document.getElementById("futureMode")?.value||"nominal",labels=projections.mid.map(x=>x.age),series=[];
  if(mode==="nominal"){series.push({name:"Konservativ",data:projections.low.map(x=>x.net),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.net),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.net),color:"#2563eb"})}
  else if(mode==="real"){series.push({name:"Konservativ",data:projections.low.map(x=>x.real),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.real),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.real),color:"#2563eb"})}
  else{series.push({name:"Portefølje",data:projections.mid.map(x=>x.port),color:"#14b8a6"},{name:"Pensjon",data:projections.mid.map(x=>x.pension),color:"#8b5cf6"},{name:"Boligkapital",data:projections.mid.map(x=>x.equity),color:"#d97706"})}
  drawLineChart("futureChart",series,labels);
  const timelineGoals=milestones();
- document.getElementById("timeline").innerHTML=timelineGoals.length?timelineGoals.map(x=>`<div class="time-card"><div style="font-size:22px">${escapeHtml(x.icon||"🎯")}</div><strong>${escapeHtml(x.name)}</strong><div class="big" style="font-size:28px;margin-top:14px">${x.row?x.row.year:"–"}</div><div class="sub">${x.row?x.row.age+" år":(x.pct>=100?"Nådd":"Ikke nådd")}</div></div>`).join(""):`<div class="empty-state" style="min-width:100%"><strong>Tidslinjen fylles av dine egne mål.</strong><div class="sub">Opprett mål i fanen Plan.</div></div>`;
+ document.getElementById("timeline").innerHTML=timelineGoals.map(x=>`<div class="time-card"><div style="font-size:22px">${escapeHtml(x.icon||"🎯")}</div><strong>${escapeHtml(x.name)}</strong>${x.example?`<div class="badge" style="margin-top:8px">Illustrativt eksempel</div>`:""}<div class="big" style="font-size:28px;margin-top:14px">${x.row?x.row.year:"–"}</div><div class="sub">${x.row?`${x.row.age} år${x.example&&x.metric==="buffer"?" · hvis overskuddet brukes til buffer":""}`:(x.pct>=100?"Nådd":"Ikke nådd i modellen")}</div></div>`).join("");
  const interval=Math.max(1,Number(document.getElementById("forecastInterval")?.value||1));
  const visibleRows=projections.mid.filter((r,i)=>i===0||i===projections.mid.length-1||i%interval===0);
  document.getElementById("forecastBody").innerHTML=visibleRows.map(r=>`<tr class="${r.age%5===0?'forecast-milestone':''}"><td>${r.year} / ${r.age}</td><td>${fmtNok(r.salary)}</td><td>${fmtNok(r.monthly)}</td><td>${fmtNok(r.port)}</td><td>${fmtNok(r.pension)}</td><td>${fmtNok(r.equity)}</td><td class="forecast-net">${fmtNok(r.net)}</td><td class="forecast-real">${fmtNok(r.real)}</td></tr>`).join("")
@@ -1717,6 +1785,38 @@ function renderSettings(){
 function setVal(id,v){const e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=v}
 function getVal(id,fallback){const e=document.getElementById(id);return e&&e.value!==""?Number(e.value):fallback}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+
+function editDestination(target){
+ const investmentIndex=state.budget.findIndex(row=>row.linked);
+ const subscriptionIndex=state.budget.findIndex(row=>row.id==="subscriptions");
+ const insuranceIndex=state.budget.findIndex(row=>row.id==="insurance");
+ return {
+  future:{page:"future",selector:"#futureMode",message:"Her ser du hvordan forutsetningene påvirker fremtiden."},
+  goals:{page:"goals",selector:"#goalsOverview",message:"Her kan du opprette eller endre målene dine."},
+  budget:{page:"budget",selector:"#budgetEntriesCard",message:"Her kan du endre inntekter og budsjettposter."},
+  liquidity:{page:"budget",selector:"#buffer",message:"Endre disponibel buffer her."},
+  investment:{page:"budget",selector:investmentIndex>=0?`[data-key="amount-${investmentIndex}"]`:"#budgetEntriesCard",message:"Endre månedlig investering i budsjettet."},
+  subscriptions:{page:"budget",selector:subscriptionIndex>=0?`[data-key="amount-${subscriptionIndex}"]`:"#budgetEntriesCard",message:"Gå gjennom abonnement og kommunikasjon her."},
+  insurance:{page:"budget",selector:insuranceIndex>=0?`[data-key="amount-${insuranceIndex}"]`:"#budgetEntriesCard",message:"Sammenlign og juster forsikringskostnader her."},
+  networth:{page:"settings",selector:"#portfolioStart",message:"Endre portefølje, pensjon, bolig og gjeld her."},
+  mortgage:{page:"settings",selector:"#mortgageRate",message:"Endre boliglån, rente og løpetid her."},
+  robustness:{page:"budget",selector:"#buffer",message:"Styrk robustheten gjennom buffer og relevante budsjettposter. Pensjon endres i Innstillinger."},
+  futureSettings:{page:"settings",selector:"#retMid",message:"Endre sparing, pensjon og fremtidsforutsetninger her."}
+ }[target]||{page:"budget",selector:"#budgetEntriesCard",message:"Juster grunnlaget her."};
+}
+function navigateToEdit(target){
+ closeModal("healthModal");closeModal("pulseModal");
+ const destination=editDestination(target);showPage(destination.page);
+ setTimeout(()=>{
+  const element=document.querySelector(destination.selector);
+  if(!element)return;
+  element.scrollIntoView({behavior:"smooth",block:"center"});
+  element.classList.add("edit-highlight");
+  if(typeof element.focus==="function")element.focus({preventScroll:true});
+  setTimeout(()=>element.classList.remove("edit-highlight"),2800);
+  toast(destination.message);
+ },120);
+}
 
 
 
@@ -1828,13 +1928,30 @@ function showPage(id){
 }
 function on(id,event,handler){document.getElementById(id)?.addEventListener(event,handler)}
 function bindInputs(){
+ document.addEventListener("click",event=>{
+  const navButton=event.target.closest?.("[data-page]");
+  if(!navButton)return;
+  event.preventDefault();
+  showPage(navButton.dataset.page);
+ });
+ document.addEventListener("click",event=>{
+  const actionable=event.target.closest?.("[data-edit-target]");
+  if(!actionable)return;
+  const nestedControl=event.target.closest?.("a,input,select,textarea");
+  if(nestedControl&&nestedControl!==actionable)return;
+  navigateToEdit(actionable.dataset.editTarget);
+ });
+ document.addEventListener("keydown",event=>{
+  const actionable=event.target.closest?.("[data-edit-target]");
+  if(!actionable||actionable.tagName==="BUTTON"||!["Enter"," "].includes(event.key))return;
+  event.preventDefault();navigateToEdit(actionable.dataset.editTarget);
+ });
  document.querySelectorAll("input,select").forEach(el=>{
   if(!["compareSource","futureMode","forecastInterval","onboardIncome","onboardInvestment","onboardAge","onboardRetire"].includes(el.id)){
    el.addEventListener("input",leaveReferenceMode);
    el.addEventListener("change",leaveReferenceMode);
   }
  });
- document.querySelectorAll("[data-page]").forEach(button=>button.addEventListener("click",event=>{event.preventDefault();showPage(button.dataset.page)}));
  const lifeIds=["startAge","retireAge","startYear","salary","salaryGrowth","raiseShare","bonus","ipsAnnual","otpRate","portfolioStart","ipsStart","otpStart","homeValue","mortgage","homeGrowth","annualPrincipal","mortgageRate","loanYears","loanType","inflation","retLow","retMid","retHigh"];
  lifeIds.forEach(id=>on(id,"input",event=>{state.life[id]=event.target.type==="number"?finiteNumber(event.target.value):event.target.value;state.life.retireAge=Math.max(state.life.startAge+1,state.life.retireAge);renderAll()}));
  on("includeHome","change",event=>{state.life.includeHome=event.target.value==="yes";renderAll()});
