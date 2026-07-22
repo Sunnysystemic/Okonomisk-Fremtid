@@ -1,4 +1,4 @@
-const CACHE_NAME = "okonomisk-fremtid-v2-20260720";
+const CACHE_NAME = "okonomisk-fremtid-v3-20260722";
 const APP_SHELL = [
   "./",
   "./index.html",
