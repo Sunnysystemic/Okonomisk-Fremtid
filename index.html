@@ -332,6 +332,59 @@ body.dark .guide-highlight{
 @media(max-width:760px){
  .focus-impact,.recommendations-grid{grid-template-columns:1fr}
 }
+
+/* Samlet visuell retning: marine, turkis og tydelig handling */
+:root{--ink:#0d1b2c;--ink2:#103f40;--aqua:#21c7b7;--aqua-soft:#bdf8ef;--radius:22px;--shadow:0 16px 42px rgba(13,27,44,.09)}
+body{background:radial-gradient(circle at 88% 4%,rgba(33,199,183,.09),transparent 24rem),linear-gradient(180deg,#f4f7fb 0%,#eef3f8 100%);background-attachment:fixed}
+body.dark{--ink:#07111d;--ink2:#0d4544;background:linear-gradient(180deg,#08111e,#0b1423)}
+.topbar{box-shadow:0 8px 28px rgba(13,27,44,.04)}
+.sidebar{border-radius:24px;padding:14px}
+.navitem{border:1px solid transparent;transition:.18s ease}
+.navitem:hover{background:rgba(20,184,166,.07);color:var(--brand)}
+.navitem.active{border-color:rgba(20,184,166,.16);box-shadow:inset 3px 0 0 var(--brand2)}
+.page>.section-title:first-child{position:relative;overflow:hidden;isolation:isolate;min-height:132px;margin-bottom:18px;padding:24px 26px;align-items:flex-end;border-radius:26px;border:0;background:linear-gradient(125deg,var(--ink) 0%,#10313b 58%,var(--ink2) 100%);color:#fff;box-shadow:0 20px 48px rgba(13,27,44,.16)}
+.page>.section-title:first-child:after{content:"";position:absolute;z-index:-1;width:250px;height:250px;border-radius:50%;right:-72px;top:-118px;background:rgba(45,212,191,.17)}
+.page>.section-title:first-child h2{font-size:clamp(28px,3vw,42px);letter-spacing:-.035em}
+.page>.section-title:first-child .sub{margin-top:5px;color:#d2f7f1;font-size:14px}
+.page>.section-title:first-child .secondary,.page>.section-title:first-child .iconbtn{position:relative;z-index:2;background:rgba(255,255,255,.11);color:#fff;border-color:rgba(255,255,255,.2)}
+.card,.kpi,.decision-card,.goal-card,.time-card,.recommendation-card{border-color:rgba(148,163,184,.27);box-shadow:var(--shadow)}
+.card{border-radius:22px;padding:20px}
+.card>.section-title h3:before,.decision-card h3:before{content:"";display:inline-block;width:18px;height:5px;margin-right:9px;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--brand2));vertical-align:4px}
+.kpi{position:relative;overflow:hidden;border-radius:19px;padding:18px;background:linear-gradient(145deg,var(--panel),rgba(20,184,166,.045))}
+.kpi:after{content:"";position:absolute;width:72px;height:72px;border-radius:50%;right:-30px;top:-34px;background:rgba(20,184,166,.1)}
+.kpi .eyebrow{color:var(--brand);font-weight:900}
+.primary,.secondary,.iconbtn,.chipbtn,.danger{border-radius:14px;min-height:42px;transition:.16s transform,.16s box-shadow,.16s background}
+.primary:hover,.secondary:hover,.iconbtn:hover,.chipbtn:hover{transform:translateY(-1px)}
+.primary{background:linear-gradient(135deg,#0d8e83,var(--brand2));box-shadow:0 10px 24px rgba(20,184,166,.22)}
+.field input,.field select,td input,td select{border-radius:13px;min-height:43px;transition:.16s border-color,.16s box-shadow,.16s background}
+.field input:focus,.field select:focus,td input:focus,td select:focus{outline:0;border-color:var(--brand2);box-shadow:0 0 0 4px rgba(20,184,166,.12);background:var(--panel)}
+.tablewrap{border-radius:18px;box-shadow:inset 0 0 0 1px rgba(148,163,184,.08)}
+th{background:linear-gradient(135deg,var(--ink),#163b42);color:#d9fbf5;border-bottom-color:rgba(255,255,255,.09);letter-spacing:.025em}
+tbody tr{transition:.14s background}tbody tr:hover{background:rgba(20,184,166,.055)}
+.reference-banner{background:linear-gradient(125deg,var(--ink),var(--ink2));border:0;color:#fff;box-shadow:0 12px 30px rgba(13,27,44,.12)}
+.reference-banner .sub{color:#d5f8f2}
+.reference-mode-badge{background:rgba(20,184,166,.15);color:#0d8278;border:1px solid rgba(20,184,166,.16)}
+.hero-card .reference-mode-badge{color:#60e7d8;background:rgba(20,184,166,.12);border-color:rgba(45,212,191,.12)}
+.recommendation-card{background:linear-gradient(145deg,var(--ink),var(--ink2));color:#fff;border:0}
+.recommendation-card .sub{color:#d5f8f2}.recommendation-card h3{color:#fff}.recommendation-card .secondary{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.17);color:#fff}
+.time-card{background:linear-gradient(145deg,var(--ink),var(--ink2));color:#fff;border:0}.time-card .sub{color:#d5f8f2}.time-card .badge{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}
+.goal-card{border-left:5px solid var(--brand2)}
+.empty-state{background:linear-gradient(145deg,var(--panel),rgba(20,184,166,.05));border-color:rgba(20,184,166,.25)}
+.health-explain{border-left:4px solid var(--brand2)}
+.focus-card,.hero-card{border-radius:26px;background:linear-gradient(125deg,var(--ink),#10313b 58%,var(--ink2))}
+.budget-mode-switch{display:inline-grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;margin:0 0 16px;background:var(--ink);border-radius:17px;box-shadow:0 14px 34px rgba(13,27,44,.14)}
+.budget-mode-switch button{min-width:150px;border:0;border-radius:12px;padding:11px 18px;background:transparent;color:#a9c1c6;font-weight:850}
+.budget-mode-switch button.active{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 8px 20px rgba(20,184,166,.22)}
+.accounting-hero{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:24px;margin-bottom:16px;border-radius:26px;background:linear-gradient(125deg,var(--ink),var(--ink2));color:#fff;box-shadow:0 20px 48px rgba(13,27,44,.16)}
+.accounting-hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;right:-75px;top:-110px;background:rgba(45,212,191,.17)}
+.accounting-hero>*{position:relative;z-index:1}.accounting-hero .sub{color:#d5f8f2}.accounting-hero h3{font-size:28px;margin:7px 0 5px}
+.accounting-toolbar{display:flex;align-items:flex-end;gap:9px;flex-wrap:wrap}.accounting-toolbar .field{min-width:180px}.accounting-toolbar label{color:#bdeee8}.accounting-toolbar input{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;color-scheme:dark}.accounting-toolbar .secondary{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.2);color:#fff}
+.accounting-progress{display:flex;align-items:center;gap:10px;margin:12px 0}.accounting-progress .progress{flex:1}
+.variance-pill{display:inline-flex;align-items:center;justify-content:center;min-width:106px;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}
+.variance-pill.good{background:#dcfce7;color:#166534}.variance-pill.bad{background:#fee2e2;color:#991b1b}.variance-pill.neutral{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.accounting-input{min-width:130px;text-align:right;font-variant-numeric:tabular-nums}
+.accounting-summary{display:grid;gap:10px}.accounting-deviation{display:grid;grid-template-columns:1fr auto;gap:8px;padding:11px 0;border-bottom:1px solid var(--line)}.accounting-deviation:last-child{border:0}
+@media(max-width:700px){.page>.section-title:first-child{min-height:112px;padding:20px;align-items:flex-end}.page>.section-title:first-child h2{font-size:29px}.budget-mode-switch{width:100%}.budget-mode-switch button{min-width:0;padding:10px 8px}.accounting-hero{align-items:stretch;flex-direction:column;padding:20px}.accounting-toolbar{align-items:stretch}.accounting-toolbar .field{width:100%}.accounting-table th:nth-child(5),.accounting-table td:nth-child(5){display:none}.accounting-input{min-width:105px}}
 </style>
 </head>
 <body>
@@ -424,7 +477,12 @@ body.dark .guide-highlight{
 </section>
 
 <section id="budget" class="page">
-  <div class="section-title"><div><h2>Budsjett</h2><div class="sub">Planlagt månedlig kontantstrøm</div></div><button class="secondary" onclick="addBudgetRow()">+ Ny post</button></div>
+  <div class="section-title"><div><h2>Budsjett og regnskap</h2><div class="sub">Planlegg pengene – og se hvordan måneden faktisk gikk</div></div><button id="newBudgetRowButton" class="secondary" onclick="addBudgetRow()">+ Ny post</button></div>
+  <div class="budget-mode-switch" role="tablist" aria-label="Velg budsjett eller regnskap">
+    <button id="budgetModePlan" role="tab" aria-selected="true" onclick="setBudgetMode('budget')">Budsjett</button>
+    <button id="budgetModeAccounting" role="tab" aria-selected="false" onclick="setBudgetMode('accounting')">Regnskap</button>
+  </div>
+  <div id="budgetPlanView">
   <div class="kpis">
     <div class="kpi"><div class="eyebrow">Netto inntekt</div><div id="bIncome" class="value">–</div></div>
     <div class="kpi"><div class="eyebrow">Utgifter</div><div id="bExpenses" class="value">–</div></div>
@@ -496,6 +554,55 @@ body.dark .guide-highlight{
     </div>
     <div id="compareSummary" class="compare-grid"></div><div id="compareRows" class="compare-table"></div>
   </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="accountingView" style="display:none">
+    <div class="accounting-hero">
+      <div>
+        <div class="focus-tag">Faktisk mot planlagt</div>
+        <h3 id="accountingMonthTitle">Regnskap</h3>
+        <div class="sub">Før inn de faktiske beløpene. Avvik og treffsikkerhet beregnes automatisk.</div>
+      </div>
+      <div class="accounting-toolbar">
+        <div class="field"><label for="accountingMonth">Måned</label><input id="accountingMonth" type="month"></div>
+        <button class="secondary" onclick="copyBudgetToAccounting()">Kopier budsjettall</button>
+        <button class="secondary" onclick="clearAccountingMonth()">Tøm måneden</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="eyebrow">Budsjettert ut</div><div id="accountingBudgetTotal" class="value">–</div><div class="sub">Inkludert sparing og investering</div></div>
+      <div class="kpi"><div class="eyebrow">Faktisk ut</div><div id="accountingActualTotal" class="value">–</div><div id="accountingCompletionText" class="sub">Ingen poster ført</div></div>
+      <div class="kpi"><div class="eyebrow">Samlet avvik</div><div id="accountingVariance" class="value">–</div><div class="sub">Faktisk minus budsjett</div></div>
+      <div class="kpi"><div class="eyebrow">Treffsikkerhet</div><div id="accountingAccuracy" class="value">–</div><div class="sub">Basert på førte poster</div></div>
+    </div>
+
+    <div class="card" id="accountingEntriesCard">
+      <div class="section-title">
+        <div><h3>Månedens regnskap</h3><div class="sub">Budsjettet ligger fast til venstre. Du fører faktiske beløp i kolonnen ved siden av.</div></div>
+        <div class="field" style="min-width:190px"><label for="accountingIncome">Faktisk nettoinntekt</label><input id="accountingIncome" type="number" min="0" placeholder="Ikke ført" data-accounting-income data-account-key="income"></div>
+      </div>
+      <div class="accounting-progress"><div class="progress"><span id="accountingProgressBar" style="width:0%"></span></div><strong id="accountingProgressLabel">0 % ført</strong></div>
+      <div class="tablewrap">
+        <table class="accounting-table">
+          <thead><tr><th>Kategori</th><th>Budsjett</th><th>Faktisk</th><th>Avvik</th><th>Vurdering</th></tr></thead>
+          <tbody id="accountingBody"></tbody>
+          <tfoot><tr><th>Sum</th><th id="accountingBudgetSum">–</th><th id="accountingActualSum">–</th><th id="accountingVarianceSum">–</th><th></th></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <div class="section-title"><div><h3>Slik traff du</h3><div class="sub">Samlet vurdering av måneden</div></div></div>
+        <div id="accountingAssessment" class="accounting-summary"></div>
+      </div>
+      <div class="card">
+        <div class="section-title"><div><h3>Største avvik</h3><div class="sub">Postene som skilte seg mest fra planen</div></div></div>
+        <div id="accountingLargestDeviations"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -789,13 +896,13 @@ body.dark .guide-highlight{
   </div>
 </div>
 
-<div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" onclick="exportData()">Eksporter</button><button class="primary" onclick="closeModal('dataModal')">Lukk</button></div></div></div>
+<div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" onclick="exportData()">Eksporter</button><button class="danger" onclick="resetAll()">Tilbakestill alle data</button><button class="primary" onclick="closeModal('dataModal')">Lukk</button></div></div></div>
 
 <script>
 const fmtNok=n=>new Intl.NumberFormat("nb-NO",{style:"currency",currency:"NOK",maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct=n=>new Intl.NumberFormat("nb-NO",{style:"percent",maximumFractionDigits:1}).format(Number(n)||0);
 const clone=o=>JSON.parse(JSON.stringify(o));
-const SCHEMA_VERSION=3;
+const SCHEMA_VERSION=4;
 const STORAGE="okonomiskFremtid_v2";
 const LEGACY_STORAGE="okonomiskFremtidPWA_v1";
 const VALID_PAGES=new Set(["dashboard","budget","future","decisions","goals","settings"]);
@@ -803,7 +910,7 @@ window.__runtimeErrors=[];
 
 const defaultState={
  version:SCHEMA_VERSION,
- ui:{theme:"light",page:"dashboard",referenceMode:true,onboarded:false,appGuideSeen:false,goalsGuideSeen:false,goalSuggestionsDismissed:false,recommendationState:{completed:[],dismissed:[]}},
+ ui:{theme:"light",page:"dashboard",budgetMode:"budget",referenceMode:true,onboarded:false,appGuideSeen:false,goalsGuideSeen:false,goalSuggestionsDismissed:false,recommendationState:{completed:[],dismissed:[]}},
  life:{
   startAge:42,retireAge:67,startYear:2026,salary:744840,salaryGrowth:3,raiseShare:4.2,
   monthlyInvestment:2505,bonus:0,ipsAnnual:0,otpRate:4,
@@ -816,6 +923,7 @@ const defaultState={
  annual:{travel:0,gifts:0,health:0,maintenance:0},
  goals:[],
  budgetTargets:{target:null,snapshots:[]},
+ accounting:{activeMonth:new Date().toISOString().slice(0,7),months:{}},
  history:[],
  budget:[
   {id:"housing",name:"Bolig / husleie",amount:15000,reference2026:15000,type:"fixed"},
@@ -886,17 +994,32 @@ function normalizeBudget(rows){
  });
  return merged;
 }
+function normalizeAccounting(input){
+ const source=input&&typeof input==="object"?input:{};
+ const activeMonth=/^\d{4}-\d{2}$/.test(source.activeMonth||"")?source.activeMonth:new Date().toISOString().slice(0,7);
+ const months={};
+ if(source.months&&typeof source.months==="object"){
+  Object.entries(source.months).forEach(([month,record])=>{
+   if(!/^\d{4}-\d{2}$/.test(month)||!record||typeof record!=="object")return;
+   const rows={};
+   if(record.rows&&typeof record.rows==="object")Object.entries(record.rows).forEach(([id,value])=>{rows[id]=value===null||value===""||typeof value==="undefined"?null:Math.max(0,finiteNumber(value))});
+   months[month]={actualIncome:record.actualIncome===null||record.actualIncome===""||typeof record.actualIncome==="undefined"?null:Math.max(0,finiteNumber(record.actualIncome)),rows,updatedAt:safeText(record.updatedAt,"")};
+  });
+ }
+ return {activeMonth,months};
+}
 function normalizeState(raw){
  const source=raw&&typeof raw==="object"?raw:{};
  const sourceVersion=finiteNumber(source.version,1);
  const normalized={
   ...clone(defaultState),...source,version:SCHEMA_VERSION,
-  ui:{...clone(defaultState.ui),...(source.ui||{}),page:VALID_PAGES.has(source.ui?.page)?source.ui.page:"dashboard",theme:source.ui?.theme==="dark"?"dark":"light",recommendationState:{completed:Array.isArray(source.ui?.recommendationState?.completed)?source.ui.recommendationState.completed.filter(x=>typeof x==="string"):[],dismissed:Array.isArray(source.ui?.recommendationState?.dismissed)?source.ui.recommendationState.dismissed.filter(x=>typeof x==="string"):[]}},
+  ui:{...clone(defaultState.ui),...(source.ui||{}),page:VALID_PAGES.has(source.ui?.page)?source.ui.page:"dashboard",budgetMode:source.ui?.budgetMode==="accounting"?"accounting":"budget",theme:source.ui?.theme==="dark"?"dark":"light",recommendationState:{completed:Array.isArray(source.ui?.recommendationState?.completed)?source.ui.recommendationState.completed.filter(x=>typeof x==="string"):[],dismissed:Array.isArray(source.ui?.recommendationState?.dismissed)?source.ui.recommendationState.dismissed.filter(x=>typeof x==="string"):[]}},
   life:{...clone(defaultState.life),...(source.life||{})},
   profile:{...clone(defaultState.profile),...(source.profile||{})},
   annual:{...clone(defaultState.annual),...(source.annual||{})},
   goals:Array.isArray(source.goals)?source.goals.filter(goal=>goal&&typeof goal==="object"):[],
   budgetTargets:{target:source.budgetTargets?.target&&typeof source.budgetTargets.target==="object"?source.budgetTargets.target:null,snapshots:Array.isArray(source.budgetTargets?.snapshots)?source.budgetTargets.snapshots.filter(item=>item&&typeof item==="object"):[]},
+  accounting:normalizeAccounting(source.accounting),
   history:Array.isArray(source.history)?source.history:[],
   budget:normalizeBudget(source.budget)
  };
@@ -1615,7 +1738,7 @@ function renderBudget(){
  setVal("annualTravel",state.annual.travel);setVal("annualGifts",state.annual.gifts);setVal("annualHealth",state.annual.health);setVal("annualMaintenance",state.annual.maintenance);
  document.getElementById("annualMonthly").textContent="Månedlig avsetning: "+fmtNok(t.annual);
  renderBudgetTable();drawBudgetChart();renderBudgetComparison();
- document.getElementById("budgetInsights").innerHTML=healthIssuesHtml()
+ document.getElementById("budgetInsights").innerHTML=healthIssuesHtml();renderBudgetMode()
 }
 
 function referenceDeltaHtml(row){
@@ -1706,6 +1829,102 @@ function renderBudgetComparison(){
  rowsElement.innerHTML=current.budget.map(row=>{const old=oldById.get(row.id);if(!old)return"";const delta=finiteNumber(row.amount)-finiteNumber(old.amount);if(Math.abs(delta)<1)return"";return `<div class="compare-row"><strong>${escapeHtml(row.name)}</strong><span class="compare-old">Før ${fmtNok(old.amount)}</span><span>Nå ${fmtNok(row.amount)}</span><strong class="${delta>0?"bad":"good"}">${delta>0?"+":"−"}${fmtNok(Math.abs(delta))}</strong></div>`}).join("")||`<div class="empty-state"><strong>Budsjettene er like.</strong><div class="sub">Endre en post for å se forskjellen.</div></div>`;
 }
 
+function accountingRows(){
+ const rows=state.budget.map(row=>({id:row.id,name:row.name,amount:finiteNumber(row.amount),type:row.type,linked:Boolean(row.linked)}));
+ const annual=annualMonthly();
+ if(annual>0)rows.push({id:"annualCosts",name:"Årlige kostnader (månedssnitt)",amount:annual,type:"variable",linked:false});
+ return rows;
+}
+function ensureAccountingRecord(month=state.accounting.activeMonth){
+ if(!state.accounting||typeof state.accounting!=="object")state.accounting=normalizeAccounting(null);
+ if(!state.accounting.months[month])state.accounting.months[month]={actualIncome:null,rows:{},updatedAt:""};
+ return state.accounting.months[month];
+}
+function accountingMonthLabel(month){
+ try{return new Intl.DateTimeFormat("nb-NO",{month:"long",year:"numeric"}).format(new Date(`${month}-15T12:00:00`))}catch{return month}
+}
+function accountingStats(record=ensureAccountingRecord()){
+ const rows=accountingRows();
+ const details=rows.map(row=>{
+  const raw=record.rows?.[row.id],entered=raw!==null&&raw!==""&&typeof raw!=="undefined";
+  const actual=entered?Math.max(0,finiteNumber(raw)):null;
+  const diff=entered?actual-row.amount:null;
+  const favorable=entered&&(row.type==="saving"?diff>=0:diff<=0);
+  return {...row,entered,actual,diff,favorable};
+ });
+ const entered=details.filter(row=>row.entered),budgetTotal=details.reduce((sum,row)=>sum+row.amount,0);
+ const actualTotal=entered.reduce((sum,row)=>sum+row.actual,0),comparableBudget=entered.reduce((sum,row)=>sum+row.amount,0);
+ const absoluteDeviation=entered.reduce((sum,row)=>sum+Math.abs(row.diff),0),variance=actualTotal-comparableBudget;
+ const accuracy=entered.length&&comparableBudget>0?Math.max(0,Math.min(100,100-absoluteDeviation/comparableBudget*100)):null;
+ const completion=details.length?entered.length/details.length*100:0;
+ const actualIncome=record.actualIncome===null||record.actualIncome===""||typeof record.actualIncome==="undefined"?null:Math.max(0,finiteNumber(record.actualIncome));
+ return {rows:details,enteredCount:entered.length,budgetTotal,actualTotal,comparableBudget,variance,accuracy,completion,actualIncome,actualRemaining:actualIncome===null?null:actualIncome-actualTotal};
+}
+function setBudgetMode(mode){
+ state.ui.budgetMode=mode==="accounting"?"accounting":"budget";
+ renderBudgetMode();saveState();
+}
+function renderBudgetMode(){
+ const accounting=state.ui.budgetMode==="accounting";
+ const planView=document.getElementById("budgetPlanView"),accountingView=document.getElementById("accountingView"),newRow=document.getElementById("newBudgetRowButton");
+ if(planView)planView.style.display=accounting?"none":"block";
+ if(accountingView)accountingView.style.display=accounting?"block":"none";
+ if(newRow)newRow.style.display=accounting?"none":"inline-flex";
+ const planButton=document.getElementById("budgetModePlan"),accountingButton=document.getElementById("budgetModeAccounting");
+ [planButton,accountingButton].forEach(button=>button?.classList.remove("active"));
+ (accounting?accountingButton:planButton)?.classList.add("active");
+ if(planButton)planButton.setAttribute("aria-selected",String(!accounting));
+ if(accountingButton)accountingButton.setAttribute("aria-selected",String(accounting));
+ if(accounting)renderAccounting();
+}
+function renderAccounting(){
+ const body=document.getElementById("accountingBody");if(!body)return;
+ const focused=document.activeElement,focusKey=focused?.dataset?.accountKey,selection=focused?.selectionStart;
+ const month=state.accounting.activeMonth,record=ensureAccountingRecord(month),stats=accountingStats(record);
+ const monthInput=document.getElementById("accountingMonth");if(monthInput&&document.activeElement!==monthInput)monthInput.value=month;
+ document.getElementById("accountingMonthTitle").textContent=`Regnskap for ${accountingMonthLabel(month)}`;
+ document.getElementById("accountingBudgetTotal").textContent=fmtNok(stats.budgetTotal);
+ document.getElementById("accountingActualTotal").textContent=stats.enteredCount?fmtNok(stats.actualTotal):"–";
+ document.getElementById("accountingCompletionText").textContent=stats.enteredCount?`${stats.enteredCount} av ${stats.rows.length} poster ført`:"Ingen poster ført";
+ const varianceElement=document.getElementById("accountingVariance");varianceElement.textContent=stats.enteredCount?`${stats.variance>0?"+":""}${fmtNok(stats.variance)}`:"–";varianceElement.className="value "+(!stats.enteredCount?"":stats.variance<=0?"good":"bad");
+ document.getElementById("accountingAccuracy").textContent=stats.accuracy===null?"–":`${Math.round(stats.accuracy)} %`;
+ document.getElementById("accountingProgressBar").style.width=`${stats.completion}%`;
+ document.getElementById("accountingProgressLabel").textContent=`${Math.round(stats.completion)} % ført`;
+ const incomeInput=document.getElementById("accountingIncome");if(incomeInput&&document.activeElement!==incomeInput)incomeInput.value=record.actualIncome??"";
+ body.innerHTML=stats.rows.map(row=>{
+  const diffText=row.entered?`${row.diff>0?"+":""}${fmtNok(row.diff)}`:"–";
+  let status="Ikke ført",tone="neutral";
+  if(row.entered&&Math.abs(row.diff)<1){status="På budsjett";tone="neutral"}
+  else if(row.entered&&row.type==="saving"){status=row.diff>0?"Mer spart":"Mindre spart";tone=row.favorable?"good":"bad"}
+  else if(row.entered){status=row.diff>0?"Over budsjett":"Under budsjett";tone=row.favorable?"good":"bad"}
+  return `<tr><td><strong>${escapeHtml(row.name)}</strong>${row.type==="saving"?`<div class="sub">Sparing / investering</div>`:""}</td><td>${fmtNok(row.amount)}</td><td><input class="accounting-input" type="number" min="0" placeholder="Ikke ført" value="${row.actual??""}" data-accounting-row="${escapeHtml(row.id)}" data-account-key="row:${escapeHtml(row.id)}"></td><td class="${row.entered?(row.favorable?"good":"bad"):""}">${diffText}</td><td><span class="variance-pill ${tone}">${status}</span></td></tr>`;
+ }).join("");
+ document.getElementById("accountingBudgetSum").textContent=fmtNok(stats.budgetTotal);
+ document.getElementById("accountingActualSum").textContent=stats.enteredCount?fmtNok(stats.actualTotal):"–";
+ document.getElementById("accountingVarianceSum").textContent=stats.enteredCount?`${stats.variance>0?"+":""}${fmtNok(stats.variance)}`:"–";
+ const accuracyLabel=stats.accuracy===null?"Før inn faktiske beløp for å beregne treffsikkerhet.":stats.accuracy>=90?"Svært presist budsjett":stats.accuracy>=75?"Godt samsvar med budsjettet":stats.accuracy>=55?"Flere merkbare avvik":"Store avvik fra budsjettet";
+ const remainingText=stats.actualIncome===null?"Før faktisk nettoinntekt for å se månedens resultat.":`${stats.actualRemaining>=0?"Igjen denne måneden":"Mangler denne måneden"}: ${fmtNok(Math.abs(stats.actualRemaining))}`;
+ document.getElementById("accountingAssessment").innerHTML=`<div class="accounting-deviation"><span><strong>${accuracyLabel}</strong><div class="sub">Treffsikkerhet måles på postene du har ført.</div></span><strong>${stats.accuracy===null?"–":Math.round(stats.accuracy)+" %"}</strong></div><div class="accounting-deviation"><span><strong>Føring</strong><div class="sub">${stats.enteredCount} av ${stats.rows.length} poster er registrert.</div></span><strong>${Math.round(stats.completion)} %</strong></div><div class="accounting-deviation"><span><strong>Månedsresultat</strong><div class="sub">${remainingText}</div></span><strong class="${stats.actualRemaining===null?"":stats.actualRemaining>=0?"good":"bad"}">${stats.actualRemaining===null?"–":fmtNok(stats.actualRemaining)}</strong></div>`;
+ const deviations=stats.rows.filter(row=>row.entered&&Math.abs(row.diff)>=1).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff)).slice(0,5);
+ document.getElementById("accountingLargestDeviations").innerHTML=deviations.length?deviations.map(row=>`<div class="accounting-deviation"><span><strong>${escapeHtml(row.name)}</strong><div class="sub">Budsjett ${fmtNok(row.amount)} · faktisk ${fmtNok(row.actual)}</div></span><strong class="${row.favorable?"good":"bad"}">${row.diff>0?"+":""}${fmtNok(row.diff)}</strong></div>`).join(""):`<div class="empty-state" style="padding:24px"><strong>Ingen avvik å vise ennå.</strong><div class="sub">Før faktiske tall, eller kopier budsjettet som utgangspunkt.</div></div>`;
+ if(focusKey){const next=[...document.querySelectorAll("[data-account-key]")].find(element=>element.dataset.accountKey===focusKey);if(next){next.focus();if(typeof selection==="number"&&next.setSelectionRange)try{next.setSelectionRange(selection,selection)}catch{}}}
+}
+function updateAccountingRow(id,value){
+ leaveReferenceMode();const record=ensureAccountingRecord();record.rows[id]=value===""?null:Math.max(0,finiteNumber(value));record.updatedAt=new Date().toISOString();renderAccounting();saveState();
+}
+function updateAccountingIncome(value){
+ leaveReferenceMode();const record=ensureAccountingRecord();record.actualIncome=value===""?null:Math.max(0,finiteNumber(value));record.updatedAt=new Date().toISOString();renderAccounting();saveState();
+}
+function copyBudgetToAccounting(){
+ const record=ensureAccountingRecord(),hasValues=record.actualIncome!==null||Object.values(record.rows||{}).some(value=>value!==null&&typeof value!=="undefined");
+ if(hasValues&&!confirm("Erstatte de førte tallene for denne måneden med budsjettallene?"))return;
+ record.actualIncome=state.profile.netIncome;record.rows={};accountingRows().forEach(row=>record.rows[row.id]=row.amount);record.updatedAt=new Date().toISOString();leaveReferenceMode();renderAccounting();saveState();toast("Budsjettallene er kopiert til regnskapet");
+}
+function clearAccountingMonth(){
+ if(!confirm(`Tømme regnskapet for ${accountingMonthLabel(state.accounting.activeMonth)}?`))return;
+ state.accounting.months[state.accounting.activeMonth]={actualIncome:null,rows:{},updatedAt:""};renderAccounting();saveState();toast("Måneden er tømt");
+}
+
 function renderBudgetTable(){
  const body=document.getElementById("budgetBody"),focus=document.activeElement,focusKey=focus?.dataset?.key,selStart=focus?.selectionStart;
  body.innerHTML=state.budget.map((r,i)=>`<tr class="${r.linked?"row-linked":""}"><td><input data-key="name-${i}" value="${escapeHtml(r.name)}" ${r.linked?"readonly":""} oninput="updateBudgetField(${i},'name',this.value,this)"></td><td>
@@ -1724,7 +1943,7 @@ function updateBudgetField(i,key,value,el){
  const t=totals();document.getElementById("budgetSum").textContent=fmtNok(t.total);document.getElementById("budgetPct").textContent=fmtPct(t.total/Math.max(1,state.profile.netIncome));
  renderAllExceptTable();saveState()
 }
-function renderAllExceptTable(){recalc();renderSafely("Dashboard",renderDashboard);renderSafely("Anbefalinger",renderRecommendations);renderSafely("Budsjettgraf",drawBudgetChart);renderSafely("Budsjettsammenligning",renderBudgetComparison);renderSafely("Fremtid",renderFuture);renderSafely("Beslutninger",renderDecisions);renderSafely("Plan",renderGoals);renderSafely("Innstillinger",renderSettings);const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=healthIssuesHtml()}
+function renderAllExceptTable(){recalc();renderSafely("Dashboard",renderDashboard);renderSafely("Anbefalinger",renderRecommendations);renderSafely("Budsjettgraf",drawBudgetChart);renderSafely("Budsjettsammenligning",renderBudgetComparison);renderSafely("Regnskap",renderBudgetMode);renderSafely("Fremtid",renderFuture);renderSafely("Beslutninger",renderDecisions);renderSafely("Plan",renderGoals);renderSafely("Innstillinger",renderSettings);const t=totals();document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");document.getElementById("budgetInsights").innerHTML=healthIssuesHtml()}
 function addBudgetRow(){state.budget.splice(Math.max(0,state.budget.length-1),0,{id:"custom"+Date.now(),name:"Ny post",amount:0,type:"variable"});renderBudget();saveState()}
 function removeBudgetRow(i){if(state.budget[i]?.linked)return;state.budget.splice(i,1);renderAll()}
 function addRecommendedZeroRows(){
@@ -1928,6 +2147,10 @@ function showPage(id){
 }
 function on(id,event,handler){document.getElementById(id)?.addEventListener(event,handler)}
 function bindInputs(){
+ document.addEventListener("input",event=>{
+  if(event.target.matches?.("[data-accounting-row]"))updateAccountingRow(event.target.dataset.accountingRow,event.target.value);
+  else if(event.target.matches?.("[data-accounting-income]"))updateAccountingIncome(event.target.value);
+ });
  document.addEventListener("click",event=>{
   const navButton=event.target.closest?.("[data-page]");
   if(!navButton)return;
@@ -1947,7 +2170,7 @@ function bindInputs(){
   event.preventDefault();navigateToEdit(actionable.dataset.editTarget);
  });
  document.querySelectorAll("input,select").forEach(el=>{
-  if(!["compareSource","futureMode","forecastInterval","onboardIncome","onboardInvestment","onboardAge","onboardRetire"].includes(el.id)){
+  if(!["compareSource","futureMode","forecastInterval","accountingMonth","onboardIncome","onboardInvestment","onboardAge","onboardRetire"].includes(el.id)){
    el.addEventListener("input",leaveReferenceMode);
    el.addEventListener("change",leaveReferenceMode);
   }
@@ -1965,6 +2188,7 @@ function bindInputs(){
  on("futureMode","change",()=>renderSafely("Fremtid",renderFuture));
  on("forecastInterval","change",()=>renderSafely("Fremtid",renderFuture));
  on("compareSource","change",event=>{state.ui.compareSource=event.target.value;renderBudgetComparison();saveState()});
+ on("accountingMonth","change",event=>{if(!/^\d{4}-\d{2}$/.test(event.target.value))return;state.accounting.activeMonth=event.target.value;ensureAccountingRecord();renderAccounting();saveState()});
  on("goalMetric","change",updateGoalPreview);
  on("goalTarget","input",updateGoalPreview);
  on("decisionInvestment","input",event=>{const range=document.getElementById("decisionInvestmentRange");if(range)range.value=event.target.value;renderSafely("Beslutninger",renderDecisions)});
