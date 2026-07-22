@@ -45,12 +45,15 @@ function createFinanceEngine({getState,getProjections}){
   const s=state(),life=s.life,rows=[];let salary=life.salary,monthly=life.monthlyInvestment,bonus=life.bonus,portfolio=life.portfolioStart,ips=life.ipsStart,otp=life.otpStart;
   let home=life.includeHome?life.homeValue:0,loan=life.includeHome?life.mortgage:0,price=1;
   for(let index=0;index<=life.retireAge-life.startAge;index++){
-   const ordinary=monthly*12,otpIn=salary*life.otpRate/100;
-   portfolio=(portfolio+ordinary+bonus)*(1+rate);ips=(ips+life.ipsAnnual)*(1+rate);otp=(otp+otpIn)*(1+rate);
-   if(life.includeHome){home*=1+life.homeGrowth/100;loan=Math.max(0,loan-life.annualPrincipal)}
-   price*=1+life.inflation/100;const equity=life.includeHome?home-loan:0,net=s.profile.buffer+portfolio+ips+otp+equity;
+   if(index>0){
+    const raise=salary*life.salaryGrowth/100;salary+=raise;monthly+=raise*life.raiseShare/100/12;
+    const ordinary=monthly*12,otpIn=salary*life.otpRate/100;
+    portfolio=(portfolio+ordinary+bonus)*(1+rate);ips=(ips+life.ipsAnnual)*(1+rate);otp=(otp+otpIn)*(1+rate);
+    if(life.includeHome){home*=1+life.homeGrowth/100;loan=Math.max(0,loan-life.annualPrincipal)}
+    price*=1+life.inflation/100;
+   }
+   const equity=life.includeHome?home-loan:0,net=s.profile.buffer+portfolio+ips+otp+equity;
    rows.push({year:life.startYear+index,age:life.startAge+index,salary,monthly,port:portfolio,ips,otp,pension:ips+otp,home,loan,equity,net,real:net/price});
-   const raise=salary*life.salaryGrowth/100;salary+=raise;monthly+=raise*life.raiseShare/100/12;bonus+=bonus*life.salaryGrowth/100*life.raiseShare/100;
   }
   return rows;
  }

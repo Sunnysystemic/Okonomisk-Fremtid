@@ -1,14 +1,15 @@
-const CACHE_NAME = "okonomisk-fremtid-v8-phase3-20260722-1";
+const CACHE_NAME = "okonomisk-fremtid-v2-launch-20260722";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./privacy.html",
-  "./assets/styles.css?v=v8-phase3-1",
-  "./assets/design-system.css?v=v8-phase3-1",
-  "./assets/finance.js?v=v8-phase3-1",
-  "./assets/recommendations.js?v=v8-phase3-1",
-  "./assets/app.js?v=v8-phase3-1",
+  "./assets/styles.css?v=v2-launch-20260722",
+  "./assets/design-system.css?v=v2-launch-20260722",
+  "./assets/quality.js?v=v2-launch-20260722",
+  "./assets/finance.js?v=v2-launch-20260722",
+  "./assets/recommendations.js?v=v2-launch-20260722",
+  "./assets/app.js?v=v2-launch-20260722",
   "./icon-192.png",
   "./icon-512.png",
 ];

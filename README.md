@@ -1,25 +1,32 @@
-# Økonomisk fremtid – fase 1, 2 og 3 ferdig
+# Økonomisk fremtid – lanseringskandidat v2
 
-Dette er en komplett erstatningspakke. Den inneholder den stabile kodebasen fra fase 1, den prioriterte anbefalingsmotoren fra fase 2 og det gjennomgående designsystemet fra fase 3.
+Økonomisk fremtid er en lokal PWA for budsjett, regnskap, økonomiske valg, mål og langsiktige scenarioer. Appen oppretter ingen konto og lagrer brukerdata lokalt i nettleseren.
 
-## Oppdater GitHub
+## Publisering på GitHub Pages
 
 1. Pakk ut ZIP-filen.
-2. Last opp hele innholdet til roten av GitHub-repositoryet.
+2. Last opp hele innholdet til roten av repositoryet.
 3. Behold mappestrukturen, særlig `.github`, `assets` og `tests`.
 4. Erstatt eksisterende filer når GitHub spør.
 
-GitHub Pages publiserer deretter den nye versjonen automatisk.
+Workflowen i `.github/workflows/deploy-pages.yml` publiserer automatisk fra `main`.
 
-## Innhold
+## Viktig om data og beregninger
 
-- `index.html` – appens struktur
-- `assets/styles.css` – komponentenes grunnstiler
-- `assets/design-system.css` – fase 3-design for hele produktet
-- `assets/app.js` – visning, navigasjon og brukerhandlinger
-- `assets/finance.js` – beregninger og økonomisk helse
+- Referanseinntekt og samlet referanseforbruk bygger på SSB-tall, prisjustert til juni 2026.
+- Praktiske budsjettunderposter og langsiktige scenarioer inneholder tydelig merkede modellantakelser.
+- Resultatene er illustrasjoner, ikke personlig investerings-, skatte- eller pensjonsrådgivning.
+- Brukeren bør eksportere en sikkerhetskopi før bytte av nettleser eller enhet.
+
+Se [LANSERINGSKONTROLL.md](LANSERINGSKONTROLL.md) for gjennomførte kontroller, kilder og kjente avgrensninger.
+
+## Prosjektstruktur
+
+- `index.html` – struktur og tilgjengelige dialoger
+- `assets/design-system.css` – gjennomgående design
+- `assets/quality.js` – validering og importkontroll
+- `assets/finance.js` – økonomiske beregninger
 - `assets/recommendations.js` – prioriterte anbefalinger
-- `sw.js` – offline-støtte og versjonert hurtiglager
-- `tests` – automatiske struktur-, domene- og nettlesertester
-
-Brukerdata lagres fortsatt bare lokalt i nettleseren.
+- `assets/app.js` – navigasjon, visning og brukerhandlinger
+- `sw.js` – offline-støtte og oppdateringsflyt
+- `tests` – struktur-, domene- og nettlesertester

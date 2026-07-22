@@ -5,10 +5,13 @@
 const fmtNok=n=>new Intl.NumberFormat("nb-NO",{style:"currency",currency:"NOK",maximumFractionDigits:0}).format(Number(n)||0);
 const fmtPct=n=>new Intl.NumberFormat("nb-NO",{style:"percent",maximumFractionDigits:1}).format(Number(n)||0);
 const clone=o=>JSON.parse(JSON.stringify(o));
-const SCHEMA_VERSION=7;
+const SCHEMA_VERSION=8;
 const STORAGE="okonomiskFremtid_v2";
 const LEGACY_STORAGE="okonomiskFremtidPWA_v1";
+const RECOVERY_STORAGE="okonomiskFremtid_recovery_v1";
 const VALID_PAGES=new Set(["dashboard","budget","future","decisions","goals","settings"]);
+if(!globalThis.OFQuality)throw new Error("Kvalitetsmodulen ble ikke lastet");
+const {INPUT_RULES,clamp}=globalThis.OFQuality;
 const LEGACY_GOAL_NAMES=new Set([
  "1 million investert","5 millioner investert","10 millioner nettoformue","Boliglån under 2 millioner"
 ]);
@@ -64,10 +67,9 @@ const renderMetrics=Object.fromEntries([...VALID_PAGES].map(page=>[page,0]));
 
 
 function completeOnboarding(){
- const income=Math.max(0,Number(document.getElementById("onboardIncome").value)||0);
- const investment=Math.max(0,Number(document.getElementById("onboardInvestment").value)||0);
- const age=Math.max(18,Number(document.getElementById("onboardAge").value)||30);
- const retire=Math.max(age+1,Number(document.getElementById("onboardRetire").value)||67);
+ const fields=["onboardIncome","onboardInvestment","onboardAge","onboardRetire"].map(id=>document.getElementById(id));
+ if(!fields.every(input=>validateNumberInput(input))){toast("Kontroller feltene før du fortsetter");return}
+ const income=Number(fields[0].value),investment=Number(fields[1].value),age=Number(fields[2].value),retire=Math.max(age+1,Number(fields[3].value));
  state.profile.netIncome=income;
  state.life.monthlyInvestment=investment;
  state.life.startAge=age;
@@ -92,12 +94,12 @@ function normalizeBudget(rows){
  const byId=new Map(input.filter(row=>row&&typeof row==="object"&&row.id).map(row=>[String(row.id),row]));
  const merged=defaultState.budget.map(base=>{
   const saved=byId.get(base.id)||{};
-  return {...base,...saved,id:base.id,name:safeText(saved.name,base.name),amount:Math.max(0,finiteNumber(saved.amount,base.amount)),reference2026:Math.max(0,finiteNumber(saved.reference2026,base.reference2026)),type:["fixed","variable","saving"].includes(saved.type)?saved.type:base.type,linked:Boolean(base.linked)};
+  return {...base,...saved,id:base.id,name:safeText(saved.name,base.name).slice(0,80),amount:clamp(finiteNumber(saved.amount,base.amount),0,1e9),reference2026:clamp(finiteNumber(saved.reference2026,base.reference2026),0,1e9),type:["fixed","variable","saving"].includes(saved.type)?saved.type:base.type,linked:Boolean(base.linked)};
  });
  const known=new Set(defaultState.budget.map(row=>row.id));
  input.forEach((row,index)=>{
   if(!row||known.has(String(row.id)))return;
-  merged.splice(Math.max(0,merged.length-1),0,{id:safeText(row.id,"custom_"+index),name:safeText(row.name,"Egen post"),amount:Math.max(0,finiteNumber(row.amount)),reference2026:Math.max(0,finiteNumber(row.reference2026)),type:["fixed","variable","saving"].includes(row.type)?row.type:"variable"});
+  merged.splice(Math.max(0,merged.length-1),0,{id:safeText(row.id,"custom_"+index).slice(0,80),name:safeText(row.name,"Egen post").slice(0,80),amount:clamp(finiteNumber(row.amount),0,1e9),reference2026:clamp(finiteNumber(row.reference2026),0,1e9),type:["fixed","variable","saving"].includes(row.type)?row.type:"variable"});
  });
  return merged;
 }
@@ -109,8 +111,8 @@ function normalizeAccounting(input){
   Object.entries(source.months).forEach(([month,record])=>{
    if(!/^\d{4}-\d{2}$/.test(month)||!record||typeof record!=="object")return;
    const rows={};
-   if(record.rows&&typeof record.rows==="object")Object.entries(record.rows).forEach(([id,value])=>{rows[id]=value===null||value===""||typeof value==="undefined"?null:Math.max(0,finiteNumber(value))});
-   months[month]={actualIncome:record.actualIncome===null||record.actualIncome===""||typeof record.actualIncome==="undefined"?null:Math.max(0,finiteNumber(record.actualIncome)),rows,updatedAt:safeText(record.updatedAt,"")};
+   if(record.rows&&typeof record.rows==="object")Object.entries(record.rows).forEach(([id,value])=>{rows[id]=value===null||value===""||typeof value==="undefined"?null:clamp(finiteNumber(value),0,1e9)});
+   months[month]={actualIncome:record.actualIncome===null||record.actualIncome===""||typeof record.actualIncome==="undefined"?null:clamp(finiteNumber(record.actualIncome),0,1e9),rows,updatedAt:safeText(record.updatedAt,"")};
   });
  }
  return {activeMonth,months};
@@ -123,11 +125,20 @@ function normalizeRecommendationHistory(items,type){
   return [{id:item.id,signature:safeText(item.signature,""),at:safeText(item.at,""),until:type==="dismissed"?safeText(item.until,""):""}]
  })
 }
+function normalizeGoals(items){
+ const metrics=new Set(["buffer","portfolio","pension","netWorth","mortgage","monthlyInvestment","savingsRate","debtReduction"]);
+ return (Array.isArray(items)?items:[]).flatMap((goal,index)=>{
+  if(!goal||typeof goal!=="object")return [];
+  const name=safeText(goal.name,"").trim().slice(0,80),metric=metrics.has(goal.metric)?goal.metric:"buffer",target=clamp(finiteNumber(goal.target),0,1e12);
+  if(!name||target<=0)return [];
+  return [{id:safeText(goal.id,`goal_import_${index}`).slice(0,100),name,metric,target,icon:safeText(goal.icon,"🎯").slice(0,4)}]
+ })
+}
 function applyStateMigrations(normalized,source,sourceVersion){
  if(sourceVersion<3&&normalized.ui.referenceMode){
   const savedBudget=Array.isArray(source.budget)?source.budget:[];
   const budgetWasEdited=savedBudget.some(row=>row&&finiteNumber(row.reference2026,0)>0&&Math.abs(finiteNumber(row.amount)-finiteNumber(row.reference2026))>1);
-  const onboardingWasEdited=finiteNumber(source.profile?.netIncome,59650)!==59650||finiteNumber(source.life?.monthlyInvestment,3103)!==3103||finiteNumber(source.life?.startAge,42)!==42||finiteNumber(source.life?.retireAge,67)!==67;
+  const onboardingWasEdited=finiteNumber(source.profile?.netIncome,59650)!==59650||finiteNumber(source.life?.monthlyInvestment,2505)!==2505||finiteNumber(source.life?.startAge,42)!==42||finiteNumber(source.life?.retireAge,67)!==67;
   if(budgetWasEdited||onboardingWasEdited){
    normalized.ui.referenceMode=false;
   }else{
@@ -151,7 +162,7 @@ function normalizeState(raw){
   life:{...clone(defaultState.life),...(source.life||{})},
   profile:{...clone(defaultState.profile),...(source.profile||{})},
   annual:{...clone(defaultState.annual),...(source.annual||{})},
-  goals:Array.isArray(source.goals)?source.goals.filter(goal=>goal&&typeof goal==="object"):[],
+  goals:normalizeGoals(source.goals),
   budgetTargets:{target:source.budgetTargets?.target&&typeof source.budgetTargets.target==="object"?source.budgetTargets.target:null,snapshots:Array.isArray(source.budgetTargets?.snapshots)?source.budgetTargets.snapshots.filter(item=>item&&typeof item==="object"):[]},
   accounting:normalizeAccounting(source.accounting),
   history:Array.isArray(source.history)?source.history:[],
@@ -161,9 +172,7 @@ function normalizeState(raw){
  Object.keys(defaultState.profile).forEach(key=>{if(typeof defaultState.profile[key]==="number")normalized.profile[key]=finiteNumber(normalized.profile[key],defaultState.profile[key])});
  Object.keys(defaultState.annual).forEach(key=>normalized.annual[key]=Math.max(0,finiteNumber(normalized.annual[key],defaultState.annual[key])));
  applyStateMigrations(normalized,source,sourceVersion);
- normalized.life.startAge=Math.max(18,normalized.life.startAge);
- normalized.life.retireAge=Math.max(normalized.life.startAge+1,normalized.life.retireAge);
- normalized.life.monthlyInvestment=Math.max(0,normalized.life.monthlyInvestment);
+ globalThis.OFQuality.normalizeStateRanges(normalized);
  const investmentRow=normalized.budget.find(row=>row.linked);
  if(investmentRow)investmentRow.amount=normalized.life.monthlyInvestment;
  return normalized;
@@ -174,6 +183,24 @@ function loadState(){
   if(raw)return normalizeState(JSON.parse(raw));
  }catch(error){recordRuntimeError("Lagring",error)}
  return clone(defaultState);
+}
+function recoverySnapshot(){
+ try{
+  const raw=localStorage.getItem(RECOVERY_STORAGE);if(!raw)return null;
+  const parsed=JSON.parse(raw);if(!parsed||typeof parsed!=="object"||!parsed.state)return null;
+  return {savedAt:safeText(parsed.savedAt,""),reason:safeText(parsed.reason,""),state:normalizeState(parsed.state)}
+ }catch(error){recordRuntimeError("Gjenoppretting",error);return null}
+}
+function saveRecoverySnapshot(reason){
+ try{localStorage.setItem(RECOVERY_STORAGE,JSON.stringify({savedAt:new Date().toISOString(),reason,state:clone(state)}));renderRecoveryStatus();return true}
+ catch(error){recordRuntimeError("Sikkerhetskopi",error);return false}
+}
+function renderRecoveryStatus(){
+ const snapshot=recoverySnapshot(),date=snapshot?.savedAt?new Date(snapshot.savedAt):null;
+ const validDate=date&&!Number.isNaN(date.getTime());
+ const text=snapshot?`Forrige data kan gjenopprettes${validDate?` · lagret ${date.toLocaleString("nb-NO",{dateStyle:"medium",timeStyle:"short"})}`:""}.`:"Ingen lokal gjenopprettingskopi er opprettet ennå.";
+ ["recoveryStatus","dataModalRecoveryStatus"].forEach(id=>{const element=document.getElementById(id);if(element)element.textContent=text});
+ ["recoverDataButton","dataModalRecoverButton"].forEach(id=>{const button=document.getElementById(id);if(button)button.disabled=!snapshot})
 }
 let saveTimer;
 function saveState(){
@@ -193,9 +220,70 @@ function recordRuntimeError(area,error){
  if(notice){notice.classList.add("visible");notice.innerHTML=`<strong>${escapeHtml(area)} kunne ikke oppdateres.</strong><span>Resten av verktøyet virker fortsatt. Last siden på nytt hvis problemet vedvarer.</span>`}
 }
 function clearRuntimeNotice(){const notice=document.getElementById("appNotice");if(notice){notice.classList.remove("visible");notice.textContent=""}}
-function toast(msg){const e=document.getElementById("toast");if(!e)return;e.textContent=msg;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
-function openModal(id){document.getElementById(id)?.classList.add("open")}
-function closeModal(id){document.getElementById(id)?.classList.remove("open")}
+let toastTimer;
+function toast(msg){const e=document.getElementById("toast");if(!e)return;clearTimeout(toastTimer);e.textContent=msg;e.style.display="block";toastTimer=setTimeout(()=>e.style.display="none",2600)}
+let previousModalFocus=null;
+function openModal(id){
+ const modal=document.getElementById(id);if(!modal)return;
+ previousModalFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+ modal.classList.add("open");modal.setAttribute("aria-hidden","false");
+ requestAnimationFrame(()=>{const focusable=modal.querySelector("input:not([type=hidden]),select,button,[tabindex]:not([tabindex='-1'])")||modal.querySelector(".modalbox");focusable?.focus()})
+}
+function closeModal(id){
+ const modal=document.getElementById(id);if(!modal)return;
+ modal.classList.remove("open");modal.setAttribute("aria-hidden","true");
+ const returnFocus=previousModalFocus;previousModalFocus=null;if(returnFocus?.isConnected)returnFocus.focus()
+}
+let pendingConfirmation=null;
+function askConfirmation({title,text,confirmLabel="Fortsett",danger=true}){
+ if(pendingConfirmation)pendingConfirmation(false);
+ document.getElementById("confirmTitle").textContent=title;
+ document.getElementById("confirmText").textContent=text;
+ const accept=document.getElementById("confirmAccept");accept.textContent=confirmLabel;accept.className=danger?"danger":"primary";
+ openModal("confirmModal");
+ return new Promise(resolve=>{pendingConfirmation=resolve})
+}
+function resolveConfirmation(accepted){
+ const resolve=pendingConfirmation;pendingConfirmation=null;closeModal("confirmModal");if(resolve)resolve(Boolean(accepted))
+}
+function setFieldError(input,message=""){
+ if(!input)return;input.setAttribute("aria-invalid",message?"true":"false");
+ const field=input.closest(".field");if(!field)return;
+ let error=field.querySelector(".field-error");
+ if(message&&!error){error=document.createElement("span");error.className="field-error";field.appendChild(error)}
+ if(error){error.textContent=message;error.hidden=!message}
+}
+function validateNumberInput(input,{announce=true}={}){
+ const rule=INPUT_RULES[input?.id];if(!rule||input.type!=="number")return true;
+ if(input.value===""){setFieldError(input,"Feltet kan ikke være tomt.");return false}
+ const entered=Number(input.value);if(!Number.isFinite(entered)){setFieldError(input,"Skriv inn et gyldig tall.");return false}
+ let minimum=rule.min,maximum=rule.max;
+ if(input.id==="retireAge")minimum=Math.max(minimum,state.life.startAge+1);
+ if(input.id==="onboardRetire")minimum=Math.max(minimum,finiteNumber(document.getElementById("onboardAge")?.value,18)+1);
+ let adjusted=clamp(entered,minimum,maximum);if(rule.step===1)adjusted=Math.round(adjusted);
+ setFieldError(input,"");
+ if(adjusted!==entered){input.value=adjusted;if(announce)toast(`${rule.label} er justert til en gyldig verdi`);input.dispatchEvent(new Event("input",{bubbles:true}))}
+ return true
+}
+function normalizeScenarioInputs(){
+ const ids=["retLow","retMid","retHigh"],inputs=ids.map(id=>document.getElementById(id));if(inputs.some(input=>!input||input.value===""))return;
+ const original=inputs.map(input=>Number(input.value)),ordered=[...original].sort((a,b)=>a-b);if(original.every((value,index)=>value===ordered[index]))return;
+ ids.forEach((id,index)=>{state.life[id]=ordered[index];inputs[index].value=ordered[index]});renderAll();toast("Avkastningsscenarioene er sortert fra lavt til høyt")
+}
+function applyInputRules(){
+ Object.entries(INPUT_RULES).forEach(([id,rule])=>{
+  const input=document.getElementById(id);if(!input)return;input.min=rule.min;input.max=rule.max;input.step=rule.step;
+  input.addEventListener("input",()=>{if(input.value!=="")setFieldError(input,"")});
+  const commit=()=>{
+   if(!validateNumberInput(input))return;
+   if(["retLow","retMid","retHigh"].includes(id))normalizeScenarioInputs();
+   if(Object.prototype.hasOwnProperty.call(state.life,id)||Object.prototype.hasOwnProperty.call(state.profile,id)){
+    globalThis.OFQuality.normalizeStateRanges(state);renderAll();
+   }
+  };
+  input.addEventListener("change",commit);input.addEventListener("blur",commit)
+ })
+}
 function toggleTheme(){state.ui.theme=state.ui.theme==="dark"?"light":"dark";applyTheme();saveState();renderAll()}
 function applyTheme(){document.body.classList.toggle("dark",state.ui.theme==="dark")}
 
@@ -558,7 +646,9 @@ function saveGoal(){
  const id=document.getElementById("goalEditId").value;
  const name=document.getElementById("goalName").value.trim();
  const metric=document.getElementById("goalMetric").value;
- const target=Math.max(0,Number(document.getElementById("goalTarget").value)||0);
+ const targetInput=document.getElementById("goalTarget");
+ if(!validateNumberInput(targetInput)){toast("Kontroller målbeløpet");return}
+ const target=Math.max(0,Number(targetInput.value)||0);
  const icon=document.getElementById("goalIcon").value;
  if(!name||target<=0){toast("Skriv inn navn og målbeløp");return}
  const goal={id:id||"goal_"+Date.now(),name,metric,target,icon};
@@ -566,8 +656,9 @@ function saveGoal(){
  if(index>=0)state.goals[index]=goal;else state.goals.push(goal);
  closeModal("goalModal");renderAll();toast(index>=0?"Målet er oppdatert":"Målet er opprettet")
 }
-function deleteGoal(id){
- const g=state.goals.find(x=>x.id===id);if(!g||!confirm(`Slette målet «${g.name}»?`))return;
+async function deleteGoal(id){
+ const g=state.goals.find(x=>x.id===id);if(!g)return;
+ if(!await askConfirmation({title:"Slett mål?",text:`Målet «${g.name}» fjernes fra planen.`,confirmLabel:"Slett mål"}))return;
  state.goals=state.goals.filter(x=>x.id!==id);renderAll()
 }
 
@@ -591,6 +682,7 @@ function renderAll(){
  clearRuntimeNotice();
  renderSafely("Beregning",recalc);
  renderPageContent(state.ui.page);
+ renderRecoveryStatus();
  saveState()
 }
 function renderDashboard(){
@@ -621,7 +713,7 @@ function renderBudget(){
  document.getElementById("bIncome").textContent=fmtNok(state.profile.netIncome);document.getElementById("bExpenses").textContent=fmtNok(t.expenses);
  document.getElementById("bInvestment").textContent=fmtNok(t.investment);document.getElementById("bRemaining").textContent=fmtNok(t.remaining);
  document.getElementById("bRemaining").className="value "+(t.remaining>=0?"good":"bad");
- setVal("netIncome",state.profile.netIncome);setVal("buffer",state.profile.buffer);setVal("adults",state.profile.adults);setVal("children",state.profile.children);
+ setVal("netIncome",state.profile.netIncome);setVal("buffer",state.profile.buffer);
  setVal("hasCar",state.profile.hasCar?"yes":"no");setVal("ownsHome",state.profile.ownsHome?"yes":"no");
  setVal("annualTravel",state.annual.travel);setVal("annualGifts",state.annual.gifts);setVal("annualHealth",state.annual.health);setVal("annualMaintenance",state.annual.maintenance);
  document.getElementById("annualMonthly").textContent="Månedlig avsetning: "+fmtNok(t.annual);
@@ -635,8 +727,8 @@ function referenceDeltaHtml(row){
    return `<div class="reference-label">Ingen pålitelig fellesverdi</div>`;
  }
  const diff=amount-ref;
- if(Math.abs(diff)<1)return `<span class="reference-delta same">SSB-nivå</span>`;
- return `<span class="reference-delta ${diff>0?"above":"below"}">${diff>0?"+":"−"}${fmtNok(Math.abs(diff))} mot SSB</span>`;
+ if(Math.abs(diff)<1)return `<span class="reference-delta same">Referansenivå</span>`;
+ return `<span class="reference-delta ${diff>0?"above":"below"}">${diff>0?"+":"−"}${fmtNok(Math.abs(diff))} mot referansen</span>`;
 }
 function leaveReferenceMode(){
  if(state.ui.referenceMode){
@@ -731,6 +823,26 @@ function ensureAccountingRecord(month=state.accounting.activeMonth){
 function accountingMonthLabel(month){
  try{return new Intl.DateTimeFormat("nb-NO",{month:"long",year:"numeric"}).format(new Date(`${month}-15T12:00:00`))}catch{return month}
 }
+function accountingMonthParts(month=state.accounting.activeMonth){
+ const match=/^(\d{4})-(\d{2})$/.exec(String(month));
+ const now=new Date();
+ return match?{year:Number(match[1]),month:match[2]}:{year:now.getFullYear(),month:String(now.getMonth()+1).padStart(2,"0")};
+}
+function renderAccountingMonthControls(){
+ const monthSelect=document.getElementById("accountingMonthPart"),yearSelect=document.getElementById("accountingYearPart");
+ if(!monthSelect||!yearSelect)return;
+ const active=accountingMonthParts(),currentYear=new Date().getFullYear(),configuredYear=Math.round(finiteNumber(state.life?.startYear,currentYear));
+ const firstYear=Math.min(currentYear-5,configuredYear-2,active.year-2),lastYear=Math.max(currentYear+10,configuredYear+10,active.year+2);
+ const years=Array.from({length:lastYear-firstYear+1},(_,index)=>firstYear+index),signature=years.join(",");
+ if(yearSelect.dataset.years!==signature){yearSelect.innerHTML=years.map(year=>`<option value="${year}">${year}</option>`).join("");yearSelect.dataset.years=signature}
+ if(document.activeElement!==monthSelect)monthSelect.value=active.month;
+ if(document.activeElement!==yearSelect)yearSelect.value=String(active.year);
+}
+function updateAccountingMonthFromControls(){
+ const month=document.getElementById("accountingMonthPart")?.value,year=document.getElementById("accountingYearPart")?.value;
+ if(!/^\d{2}$/.test(month||"")||!/^\d{4}$/.test(year||""))return;
+ state.accounting.activeMonth=`${year}-${month}`;ensureAccountingRecord();renderAccounting();saveState();
+}
 function parseAmountInput(value){
  const normalized=String(value??"").trim().replace(/\s+/g,"").replace(",",".");
  if(normalized==="")return null;
@@ -781,7 +893,7 @@ function accountingRowPresentation(row){
  return {diffText,status,tone,diffClass:row.entered?(row.favorable?"good":"bad"):""};
 }
 function renderAccountingSummary(stats){
- const monthInput=document.getElementById("accountingMonth");if(monthInput&&document.activeElement!==monthInput)monthInput.value=state.accounting.activeMonth;
+ renderAccountingMonthControls();
  document.getElementById("accountingMonthTitle").textContent=`Regnskap for ${accountingMonthLabel(state.accounting.activeMonth)}`;
  document.getElementById("accountingBudgetTotal").textContent=fmtNok(stats.budgetTotal);
  document.getElementById("accountingActualTotal").textContent=stats.enteredCount?fmtNok(stats.actualTotal):"–";
@@ -829,13 +941,13 @@ function updateAccountingRow(id,value){
 function updateAccountingIncome(value){
  leaveReferenceMode();const record=ensureAccountingRecord();record.actualIncome=parseAmountInput(value);record.updatedAt=new Date().toISOString();refreshAccountingLive();saveState();
 }
-function copyBudgetToAccounting(){
+async function copyBudgetToAccounting(){
  const record=ensureAccountingRecord(),hasValues=record.actualIncome!==null||Object.values(record.rows||{}).some(value=>value!==null&&typeof value!=="undefined");
- if(hasValues&&!confirm("Erstatte de førte tallene for denne måneden med budsjettallene?"))return;
+ if(hasValues&&!await askConfirmation({title:"Erstatt regnskapstall?",text:"De førte tallene for denne måneden erstattes med budsjettallene.",confirmLabel:"Erstatt tallene"}))return;
  record.actualIncome=state.profile.netIncome;record.rows={};accountingRows().forEach(row=>record.rows[row.id]=row.amount);record.updatedAt=new Date().toISOString();leaveReferenceMode();renderAccounting();saveState();toast("Budsjettallene er kopiert til regnskapet");
 }
-function clearAccountingMonth(){
- if(!confirm(`Tømme regnskapet for ${accountingMonthLabel(state.accounting.activeMonth)}?`))return;
+async function clearAccountingMonth(){
+ if(!await askConfirmation({title:"Tøm måneden?",text:`Alle regnskapstall for ${accountingMonthLabel(state.accounting.activeMonth)} fjernes.`,confirmLabel:"Tøm måneden"}))return;
  state.accounting.months[state.accounting.activeMonth]={actualIncome:null,rows:{},updatedAt:""};renderAccounting();saveState();toast("Måneden er tømt");
 }
 
@@ -911,12 +1023,21 @@ function drawBudgetChart(){
 }
 function renderFuture(){
  if(!projections.mid||!projections.low||!projections.high)recalc();
+ const life=state.life;
  const referenceBanner=document.getElementById("futureReferenceBanner");
  if(referenceBanner){
   referenceBanner.innerHTML=state.ui.referenceMode
    ?`<strong>Norsk referansehusholdning 2026</strong><span>Grafen, tidslinjen og årsoversikten bruker de samme referanseverdiene som resten av verktøyet. Milepælene er illustrative eksempler til du lager egne mål i Plan.</span>`
    :`<strong>Din økonomiske plan</strong><span>Grafen, tidslinjen og tabellen er beregnet fra verdiene og målene du har registrert.</span>`;
  }
+ const assumptionStrip=document.getElementById("futureAssumptions");
+ if(assumptionStrip)assumptionStrip.innerHTML=[
+  ["Horisont",`${life.retireAge-life.startAge} år`],
+  ["Investering",`${fmtNok(life.monthlyInvestment)} / mnd.`],
+  ["Avkastning",`${life.retLow}–${life.retHigh} %`],
+  ["Inflasjon",`${life.inflation} %`],
+  ["Bolig",life.includeHome?"Inkludert":"Ikke inkludert"]
+ ].map(([label,value])=>`<span class="assumption-chip"><span>${label}</span><strong>${value}</strong></span>`).join("");
  const mode=document.getElementById("futureMode")?.value||"nominal",labels=projections.mid.map(x=>x.age),series=[];
  if(mode==="nominal"){series.push({name:"Konservativ",data:projections.low.map(x=>x.net),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.net),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.net),color:"#2563eb"})}
  else if(mode==="real"){series.push({name:"Konservativ",data:projections.low.map(x=>x.real),color:"#94a3b8"},{name:"Forventet",data:projections.mid.map(x=>x.real),color:"#14b8a6"},{name:"Sterk",data:projections.high.map(x=>x.real),color:"#2563eb"})}
@@ -1047,12 +1168,8 @@ function activatePageWithoutGuide(id){
  renderAll();
 }
 
-function askAppGuide(){
- if(confirm("Vil du åpne introduksjonen til hele verktøyet?"))startAppGuide();
-}
-function askGoalsGuide(){
- if(confirm("Vil du åpne forklaringen for Plan på nytt?"))startGoalsGuide();
-}
+async function askAppGuide(){if(await askConfirmation({title:"Åpne omvisningen?",text:"Du blir guidet gjennom alle hovedområdene i verktøyet.",confirmLabel:"Start omvisning",danger:false}))startAppGuide()}
+async function askGoalsGuide(){if(await askConfirmation({title:"Åpne forklaringen for Plan?",text:"Du får en kort gjennomgang av mål, fremdrift og tiltak.",confirmLabel:"Vis forklaring",danger:false}))startGoalsGuide()}
 function startAppGuide(){startGuide(appGuideSteps);}
 function startGoalsGuide(){startGuide(goalCoachSteps);}
 function startGuide(steps){
@@ -1149,7 +1266,10 @@ function handleAction(control){
   case "dismiss-recommendation":dismissRecommendation(control.dataset.recommendationId);break;
   case "remove-budget-row":removeBudgetRow(Number(control.dataset.budgetIndex));break;
   case "export-data":exportData();break;
+  case "recover-data":recoverData();break;
   case "reset-all":resetAll();break;
+  case "confirm-cancel":resolveConfirmation(false);break;
+  case "confirm-accept":resolveConfirmation(true);break;
   case "save-goal":saveGoal();break;
   case "guide-previous":previousCoachStep();break;
   case "guide-close":closeActiveGuide();break;
@@ -1187,30 +1307,44 @@ function bindInputs(){
   navigateToEdit(actionable.dataset.editTarget);
  });
  document.addEventListener("keydown",event=>{
+  const openModalElement=[...document.querySelectorAll(".modal.open")].at(-1);
+  if(event.key==="Escape"){
+   if(guideRunning){event.preventDefault();closeActiveGuide();return}
+   if(openModalElement){event.preventDefault();if(openModalElement.id==="confirmModal")resolveConfirmation(false);else closeModal(openModalElement.id);return}
+  }
+  if(event.key==="Tab"&&openModalElement){
+   const focusable=[...openModalElement.querySelectorAll("button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])")].filter(element=>element.offsetParent!==null);
+   if(focusable.length){const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
+  }
   const actionable=event.target.closest?.("[data-edit-target]");
   if(!actionable||actionable.tagName==="BUTTON"||!["Enter"," "].includes(event.key))return;
   event.preventDefault();navigateToEdit(actionable.dataset.editTarget);
  });
+ document.addEventListener("click",event=>{
+  if(!event.target.classList?.contains("modal")||!event.target.classList.contains("open"))return;
+  if(event.target.id==="confirmModal")resolveConfirmation(false);else closeModal(event.target.id)
+ });
  document.querySelectorAll("input,select").forEach(el=>{
-  if(!["compareSource","futureMode","forecastInterval","accountingMonth","onboardIncome","onboardInvestment","onboardAge","onboardRetire"].includes(el.id)){
+  if(!["compareSource","futureMode","forecastInterval","accountingMonthPart","accountingYearPart","onboardIncome","onboardInvestment","onboardAge","onboardRetire"].includes(el.id)){
    el.addEventListener("input",leaveReferenceMode);
    el.addEventListener("change",leaveReferenceMode);
   }
  });
  const lifeIds=["startAge","retireAge","startYear","salary","salaryGrowth","raiseShare","bonus","ipsAnnual","otpRate","portfolioStart","ipsStart","otpStart","homeValue","mortgage","homeGrowth","annualPrincipal","mortgageRate","loanYears","loanType","inflation","retLow","retMid","retHigh"];
- lifeIds.forEach(id=>on(id,"input",event=>{state.life[id]=event.target.type==="number"?finiteNumber(event.target.value):event.target.value;state.life.retireAge=Math.max(state.life.startAge+1,state.life.retireAge);renderAll()}));
+ lifeIds.forEach(id=>on(id,"input",event=>{if(event.target.type==="number"&&event.target.value==="")return;state.life[id]=event.target.type==="number"?finiteNumber(event.target.value):event.target.value;state.life.retireAge=Math.max(state.life.startAge+1,state.life.retireAge);renderAll()}));
  on("includeHome","change",event=>{state.life.includeHome=event.target.value==="yes";renderAll()});
- [["netIncome","netIncome"],["buffer","buffer"],["adults","adults"],["children","children"]].forEach(([id,key])=>on(id,"input",event=>{state.profile[key]=Math.max(0,finiteNumber(event.target.value));renderAll()}));
+ [["netIncome","netIncome"],["buffer","buffer"]].forEach(([id,key])=>on(id,"input",event=>{if(event.target.value==="")return;state.profile[key]=Math.max(0,finiteNumber(event.target.value));renderAll()}));
  on("hasCar","change",event=>{state.profile.hasCar=event.target.value==="yes";renderAll()});
  on("ownsHome","change",event=>{state.profile.ownsHome=event.target.value==="yes";renderAll()});
- [["annualTravel","travel"],["annualGifts","gifts"],["annualHealth","health"],["annualMaintenance","maintenance"]].forEach(([id,key])=>on(id,"input",event=>{state.annual[key]=Math.max(0,finiteNumber(event.target.value));renderAll()}));
- on("goalBufferMonths","input",event=>{state.profile.goalBufferMonths=Math.max(0,finiteNumber(event.target.value));renderAll()});
- on("goalInvestmentRate","input",event=>{state.profile.goalInvestmentRate=Math.max(0,finiteNumber(event.target.value));renderAll()});
- on("budgetMortgagePayment","input",event=>{const row=state.budget.find(item=>item.id==="mortgage")||state.budget.find(item=>item.id==="housing");if(row)row.amount=Math.max(0,finiteNumber(event.target.value));renderAll()});
+ [["annualTravel","travel"],["annualGifts","gifts"],["annualHealth","health"],["annualMaintenance","maintenance"]].forEach(([id,key])=>on(id,"input",event=>{if(event.target.value==="")return;state.annual[key]=Math.max(0,finiteNumber(event.target.value));renderAll()}));
+ on("goalBufferMonths","input",event=>{if(event.target.value==="")return;state.profile.goalBufferMonths=Math.max(0,finiteNumber(event.target.value));renderAll()});
+ on("goalInvestmentRate","input",event=>{if(event.target.value==="")return;state.profile.goalInvestmentRate=Math.max(0,finiteNumber(event.target.value));renderAll()});
+ on("budgetMortgagePayment","input",event=>{if(event.target.value==="")return;const row=state.budget.find(item=>item.id==="mortgage")||state.budget.find(item=>item.id==="housing");if(row)row.amount=Math.max(0,finiteNumber(event.target.value));renderAll()});
  on("futureMode","change",()=>renderSafely("Fremtid",renderFuture));
  on("forecastInterval","change",()=>renderSafely("Fremtid",renderFuture));
  on("compareSource","change",event=>{state.ui.compareSource=event.target.value;renderBudgetComparison();saveState()});
- on("accountingMonth","change",event=>{if(!/^\d{4}-\d{2}$/.test(event.target.value))return;state.accounting.activeMonth=event.target.value;ensureAccountingRecord();renderAccounting();saveState()});
+ on("accountingMonthPart","change",updateAccountingMonthFromControls);
+ on("accountingYearPart","change",updateAccountingMonthFromControls);
  on("goalMetric","change",updateGoalPreview);
  on("goalTarget","input",updateGoalPreview);
  on("decisionInvestment","input",event=>{const range=document.getElementById("decisionInvestmentRange");if(range)range.value=event.target.value;renderSafely("Beslutninger",renderDecisions)});
@@ -1218,9 +1352,33 @@ function bindInputs(){
  ["decisionPurchase","decisionHomeValue","decisionMortgage","decisionExtraPrincipal"].forEach(id=>on(id,"input",()=>renderSafely("Beslutninger",renderDecisions)));
  on("importFile","change",importData)
 }
-function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="okonomisk-fremtid-backup.json";a.click();URL.revokeObjectURL(a.href)}
-async function importData(event){try{const file=event.target.files?.[0];if(!file)return;state=normalizeState(JSON.parse(await file.text()));renderAll();showPage(state.ui.page);toast("Data importert")}catch(error){recordRuntimeError("Import",error);toast("Import feilet")}}
-function resetAll(){if(confirm("Tilbakestille alle data?")){state=clone(defaultState);localStorage.removeItem(STORAGE);localStorage.removeItem(LEGACY_STORAGE);renderAll();showPage("dashboard");toast("Tilbakestilt")}}
+function exportData(){
+ const payload={app:"Økonomisk fremtid",schemaVersion:SCHEMA_VERSION,exportedAt:new Date().toISOString(),data:clone(state)};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a"),url=URL.createObjectURL(blob);
+ a.href=url;a.download=`okonomisk-fremtid-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);toast("Sikkerhetskopien er eksportert")
+}
+function importedStateFromPayload(payload){
+ return normalizeState(globalThis.OFQuality.importCandidate(payload))
+}
+async function importData(event){
+ const input=event.target;
+ try{
+  const file=input.files?.[0];if(!file)return;if(file.size>5*1024*1024)throw new Error("Filen er større enn 5 MB");
+  const imported=importedStateFromPayload(JSON.parse(await file.text()));
+  if(!await askConfirmation({title:"Importer sikkerhetskopi?",text:"Dagens data erstattes. En lokal gjenopprettingskopi opprettes først.",confirmLabel:"Importer"}))return;
+  saveRecoverySnapshot("Før import");state=imported;renderAll();showPage(state.ui.page);toast("Sikkerhetskopien er importert")
+ }catch(error){recordRuntimeError("Import",error);toast(error?.message||"Importen mislyktes")}
+ finally{input.value=""}
+}
+async function recoverData(){
+ const snapshot=recoverySnapshot();if(!snapshot){toast("Ingen data kan gjenopprettes");return}
+ if(!await askConfirmation({title:"Gjenopprett forrige data?",text:"Dagens data erstattes av den lokale gjenopprettingskopien.",confirmLabel:"Gjenopprett"}))return;
+ const current=clone(state);state=snapshot.state;localStorage.setItem(RECOVERY_STORAGE,JSON.stringify({savedAt:new Date().toISOString(),reason:"Før gjenoppretting",state:current}));closeModal("dataModal");renderAll();showPage(state.ui.page);toast("Forrige data er gjenopprettet")
+}
+async function resetAll(){
+ if(!await askConfirmation({title:"Tilbakestill alle data?",text:"Alle registrerte tall erstattes av norsk referanseprofil. En lokal gjenopprettingskopi opprettes først.",confirmLabel:"Tilbakestill"}))return;
+ clearTimeout(saveTimer);saveRecoverySnapshot("Før tilbakestilling");state=clone(defaultState);localStorage.removeItem(STORAGE);localStorage.removeItem(LEGACY_STORAGE);closeModal("dataModal");renderAll();showPage("dashboard");toast("Dataene er tilbakestilt")
+}
 
 function drawLineChart(id,series,labels){
  const c=document.getElementById(id);if(!c)return;const rect=c.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(300,rect.width),h=Math.max(240,rect.height);c.width=w*dpr;c.height=h*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
@@ -1250,6 +1408,16 @@ function runRuntimeSmokeTests(){
   check("Anbefalinger forklarer hvorfor",recs.every(rec=>rec.title&&rec.whyNow&&rec.effect&&rec.action));
   const normalized=normalizeState({version:1,ui:{page:"ukjent"},budget:[]});
   check("Gamle data migreres",normalized.version===SCHEMA_VERSION&&normalized.ui.page==="dashboard");
+  const firstProjection=projections.mid?.[0],lastProjection=projections.mid?.at(-1);
+  check("Fremtidsberegningen starter i dag",Boolean(firstProjection)&&Math.abs(firstProjection.net-nowNetWorth())<1&&firstProjection.age===state.life.startAge);
+  check("Fremtidsberegningen slutter ved valgt alder",Boolean(lastProjection)&&lastProjection.age===state.life.retireAge);
+  check("Forutsetningene er synlige",Boolean(document.getElementById("futureAssumptions")?.textContent.trim()));
+  check("Månedsvalg bruker stabile felt",!document.querySelector('input[type="month"]')&&Boolean(document.getElementById("accountingMonthPart"))&&Boolean(document.getElementById("accountingYearPart")));
+  check("Ingen native datofelt",!document.querySelector('input[type="date"]'));
+  check("Tallfeltene har valideringsgrenser",Object.keys(INPUT_RULES).every(id=>{const input=document.getElementById(id);return !input||input.min!==""&&input.max!==""}));
+  check("Dialogene har tilgjengelig semantikk",[...document.querySelectorAll(".modal")].every(modal=>modal.getAttribute("aria-modal")==="true"&&modal.getAttribute("aria-hidden")!==null));
+  check("Sikkerhetskopi kan valideres",importedStateFromPayload({data:clone(state)}).version===SCHEMA_VERSION);
+  let rejectedInvalidImport=false;try{importedStateFromPayload({ukjent:true})}catch(error){rejectedInvalidImport=true}check("Ugyldig sikkerhetskopi avvises",rejectedInvalidImport);
   check("Ingen nye kjørefeil",window.__runtimeErrors.length===errorsBefore,`${window.__runtimeErrors.length-errorsBefore} nye feil`);
  }catch(error){
   checks.push({name:"Testkjøring",passed:false,details:error?.message||String(error)});
@@ -1261,8 +1429,10 @@ function runRuntimeSmokeTests(){
 /* Oppstart */
 function bootstrap(){
  applyTheme();
+ applyInputRules();
  bindInputs();
  activatePageWithoutGuide(state.ui.page||"dashboard");
+ renderRecoveryStatus();
  if(!state.ui.onboarded)setTimeout(()=>openModal("onboardingModal"),250);
  else if(!state.ui.appGuideSeen)setTimeout(startAppGuide,350);
  let resizeTimer;

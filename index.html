@@ -8,8 +8,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <title>Økonomisk fremtid</title>
-<link rel="stylesheet" href="assets/styles.css?v=v8-phase3-1">
-<link rel="stylesheet" href="assets/design-system.css?v=v8-phase3-1">
+<link rel="stylesheet" href="assets/styles.css?v=v2-launch-20260722">
+<link rel="stylesheet" href="assets/design-system.css?v=v2-launch-20260722">
 </head>
 <body>
 <div class="app">
@@ -142,8 +142,6 @@
       <div class="form-grid">
         <div class="field"><label>Netto månedslønn</label><input id="netIncome" type="number"></div>
         <div class="field"><label>Disponibel buffer</label><input id="buffer" type="number"></div>
-        <div class="field"><label>Voksne</label><input id="adults" type="number" min="1"></div>
-        <div class="field"><label>Barn</label><input id="children" type="number" min="0"></div>
         <div class="field"><label>Har bil</label><select id="hasCar"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
         <div class="field"><label>Eier bolig</label><select id="ownsHome"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
       </div>
@@ -152,7 +150,7 @@
   <div class="card" style="margin-top:16px" id="budgetEntriesCard">
       <div class="reference-banner">
         <strong>Startpunkt: norsk referansehusholdning 2026</strong>
-        <div class="sub">Postene er fylt med SSBs gjennomsnittlige husholdningsforbruk fra 2022, prisjustert til juni 2026. Når du endrer et beløp, vises avviket direkte ved posten.</div>
+        <div class="sub">Budsjettet summerer til SSBs gjennomsnittlige husholdningsforbruk fra 2022, prisjustert til juni 2026. Brede varegrupper er fordelt på praktiske underposter i appens modell. Når du endrer et beløp, vises avviket mot dette startpunktet direkte ved posten.</div>
       </div>
     <div class="section-title"><div><h3>Budsjettposter</h3><div class="sub">Feltene oppdateres uten at tabellen hopper eller mister fokus</div></div><button class="secondary" data-action="add-recommended-rows">Kontrollerer anbefalte poster …</button></div>
     <div class="tablewrap">
@@ -190,7 +188,7 @@
   <div class="card" style="margin-top:16px" id="budgetCompareCard">
     <div class="section-title">
       <div><h3>Sammenlign budsjett</h3><div class="sub">Sammenlign dagens budsjett med et målbudsjett eller en tidligere versjon</div></div>
-      <div class="compare-toolbar"><select id="compareSource" class="chipbtn"><option value="target">Målbudsjett</option></select><button class="secondary" data-action="save-target-budget">Bruk dagens som mål</button><button class="secondary" data-action="save-budget-snapshot">Lagre dagens budsjett</button></div>
+      <div class="compare-toolbar"><select id="compareSource" class="chipbtn" aria-label="Budsjett å sammenligne med"><option value="target">Målbudsjett</option></select><button class="secondary" data-action="save-target-budget">Bruk dagens som mål</button><button class="secondary" data-action="save-budget-snapshot">Lagre dagens budsjett</button></div>
     </div>
     <div id="compareSummary" class="compare-grid"></div><div id="compareRows" class="compare-table"></div>
   </div>
@@ -206,7 +204,18 @@
         <div class="sub">Før inn de faktiske beløpene. Avvik og treffsikkerhet beregnes automatisk.</div>
       </div>
       <div class="accounting-toolbar">
-        <div class="field"><label for="accountingMonth">Måned</label><input id="accountingMonth" type="month"></div>
+        <div class="field month-picker-field">
+          <label id="accountingMonthLabel">Måned</label>
+          <div class="month-picker" role="group" aria-labelledby="accountingMonthLabel">
+            <select id="accountingMonthPart" aria-label="Måned">
+              <option value="01">Januar</option><option value="02">Februar</option><option value="03">Mars</option>
+              <option value="04">April</option><option value="05">Mai</option><option value="06">Juni</option>
+              <option value="07">Juli</option><option value="08">August</option><option value="09">September</option>
+              <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+            </select>
+            <select id="accountingYearPart" aria-label="År"></select>
+          </div>
+        </div>
         <button class="secondary" data-action="copy-budget-accounting">Kopier budsjettall</button>
         <button class="secondary" data-action="clear-accounting-month">Tøm måneden</button>
       </div>
@@ -250,10 +259,11 @@
 <section id="future" class="page">
   <div class="section-title"><div><h2>Fremtid</h2><div class="sub">Hvordan økonomien utvikler seg over livet</div></div></div>
   <div id="futureReferenceBanner" class="reference-banner"></div>
+  <div id="futureAssumptions" class="assumption-strip" aria-live="polite"></div>
   <div class="card">
     <div class="section-title">
       <div><h3>Nettoformue</h3><div class="sub">Konservativt, forventet og sterkt scenario</div></div>
-      <select id="futureMode" class="chipbtn"><option value="nominal">Nominelle kroner</option><option value="real">Dagens kroner</option><option value="components">Komponenter</option></select>
+      <select id="futureMode" class="chipbtn" aria-label="Visning av fremtidsverdier"><option value="nominal">Nominelle kroner</option><option value="real">Dagens kroner</option><option value="components">Komponenter</option></select>
     </div>
     <div class="chartbox tall"><canvas id="futureChart"></canvas></div>
   </div>
@@ -268,7 +278,7 @@
         <div class="sub">Detaljert utvikling i lønn, investering, pensjon og nettoformue</div>
       </div>
       <div class="forecast-toolbar">
-        <select id="forecastInterval" class="chipbtn">
+        <select id="forecastInterval" class="chipbtn" aria-label="Intervall for årsutvikling">
           <option value="1">Hvert år</option>
           <option value="3" selected>Hvert 3. år</option>
           <option value="5">Hvert 5. år</option>
@@ -411,14 +421,16 @@
   </div>
   <div class="card" style="margin-top:16px">
     <div class="section-title"><div><h3>Data og personvern</h3>
-    <p class="sub"><strong>Referansegrunnlag:</strong> Standardprofilen kombinerer de nyeste relevante SSB-tallene med tydelig merkede modellantakelser. Den bruker median husholdningsinntekt etter skatt, gjennomsnittlig husholdningsstørrelse, boutgifter, boligverdi, gjeld, boliglånsrente og finansiell sparing. Buffer, alder og langsiktig avkastning er nøytrale modellantakelser fordi ett representativt gjennomsnitt ikke finnes.</p>
-    <details style="margin:12px 0"><summary style="cursor:pointer;font-weight:850">Se tallene bak norsk referanseprofil</summary><div class="sub" style="margin-top:10px;line-height:1.65">Inntekt: 676 100 kr etter skatt i 2024, prisjustert til 2026. Husholdning: 2,1 personer. Boutgifter: 178 912 kr i 2025. Primærbolig: 4 576 100 kr og gjeld: 2 071 800 kr i 2024 for husholdninger med beløp. Boliglånsrente: 5,08 % i mai 2026. Finansiell investering: 4,2 % av disponibel inntekt i 2025. Gjennomsnittlig OTP-sats: 4 % i 2025. Startalder 42 år, én måneds buffer, 2 % inflasjon og avkastningsscenarioene er modellforutsetninger – ikke SSB-gjennomsnitt.</div></details>
+    <p class="sub"><strong>Referansegrunnlag:</strong> Standardprofilen kombinerer offisielle SSB-tall med tydelig merkede modellantakelser. Inntekt og samlet forbruk er statistiske startverdier. Praktiske budsjettunderposter, alder, buffer, pensjon, boligforløp og langsiktig avkastning er modellforutsetninger som brukeren bør tilpasse.</p>
+    <details style="margin:12px 0"><summary style="cursor:pointer;font-weight:850">Se tallene bak norsk referanseprofil</summary><div class="sub" style="margin-top:10px;line-height:1.65">Median husholdningsinntekt etter skatt: 676 100 kr i 2024, prisjustert til 59 650 kr per måned i juni 2026. Samlet husholdningsforbruk: 554 585 kr i 2022, prisjustert til 53 266 kr per måned i juni 2026. Gjennomsnittlig husholdningsstørrelse var 2,1 personer i 2025, men appen skalerer ikke automatisk etter husholdningstype. Primærbolig på 4 576 100 kr og gjeld på 2 071 800 kr er 2024-gjennomsnitt blant husholdninger som hadde den aktuelle posten; de beskriver derfor ikke nødvendigvis samme husholdning. Boliglånsrenten var 5,08 % i mai 2026. Månedlig investering på 2 505 kr bruker nettofinansinvestering på 4,2 % av disponibel inntekt som en enkel referanse. Fordelingen mellom budsjettunderposter, startalder 42 år, én måneds buffer, 4 % OTP, 25 års lånetid, 44 000 kr årlig avdrag, 2 % inflasjon, boligvekst og avkastningsscenarioene er modellforutsetninger – ikke SSB-gjennomsnitt eller anbefalinger.<div style="margin-top:10px"><strong>Offisielle kilder:</strong> <a href="https://www.ssb.no/inntekt-og-forbruk/forbruk/statistikk/forbruksundersokelsen/" target="_blank" rel="noreferrer">forbruk</a>, <a href="https://www.ssb.no/inntekt-og-forbruk/inntekt-og-formue/statistikk/inntekts-og-formuesstatistikk-for-husholdninger/" target="_blank" rel="noreferrer">inntekt og formue</a>, <a href="https://www.ssb.no/priser-og-prisindekser/konsumpriser/statistikk/konsumprisindeksen" target="_blank" rel="noreferrer">KPI</a>, <a href="https://www.ssb.no/bank-og-finansmarked/finansinstitusjoner-og-andre-finansielle-foretak/statistikk/renter-i-banker-og-kredittforetak/artikler/renteutvikling" target="_blank" rel="noreferrer">renter</a>, <a href="https://www.ssb.no/nasjonalregnskap-og-konjunkturer/finansregnskap/artikler/husholdningenes-finansregnskap-for-2025" target="_blank" rel="noreferrer">finansiell sparing</a>.</div></div></details>
     <div class="sub">Alt lagres lokalt på denne enheten</div></div></div>
     <div class="small-actions">
       <button class="secondary" data-action="export-data">Eksporter sikkerhetskopi</button>
-      <label class="secondary" style="cursor:pointer">Importer<input id="importFile" type="file" accept=".json" hidden></label>
+      <label class="secondary" style="cursor:pointer">Importer<input id="importFile" type="file" accept=".json,application/json" hidden></label>
+      <button id="recoverDataButton" class="secondary" data-action="recover-data">Gjenopprett forrige data</button>
       <button class="danger" data-action="reset-all">Tilbakestill alt</button>
     </div>
+    <div id="recoveryStatus" class="sub recovery-status" role="status" aria-live="polite"></div>
   </div>
 </section>
 </main>
@@ -437,28 +449,26 @@
 
 
 
-<div id="healthModal" class="modal">
-  <div class="modalbox">
+<div id="healthModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="healthModalTitle">
+  <div class="modalbox" tabindex="-1">
     <div class="eyebrow">Økonomisk helse</div>
-    <h2 style="margin-top:6px">En forklarbar vurdering</h2>
+    <h2 id="healthModalTitle" style="margin-top:6px">En forklarbar vurdering</h2>
     <p class="sub">Scoren er appens egen vurderingsmodell – ikke en offentlig eller anerkjent standard. Den bygger på likviditet, sparing, gjeld, robusthet og fremtidig retning.</p>
     <div id="healthModalBreakdown" class="health-breakdown" style="margin-top:16px"></div>
     <div class="small-actions" style="margin-top:16px"><button class="primary" data-action="close-modal" data-modal-id="healthModal">Lukk</button></div>
   </div>
 </div>
 
-<div id="pulseModal" class="modal"><div class="modalbox"><div class="eyebrow">Økonomisk puls</div><h2 style="margin-top:6px">Kort, prioritert og konkret</h2><p class="sub">Pulsen viser maksimalt tre signaler: hva som går bra, hva som bør følges med på og hva som gir størst effekt nå.</p><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="close-modal" data-modal-id="pulseModal">Lukk</button></div></div></div>
-<div id="compareNameModal" class="modal"><div class="modalbox"><h3>Lagre budsjettversjon</h3><div class="field"><label>Navn</label><input id="snapshotName" type="text" placeholder="For eksempel: Januar 2026"></div><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="confirm-budget-snapshot">Lagre</button><button class="secondary" data-action="close-modal" data-modal-id="compareNameModal">Avbryt</button></div></div></div>
+<div id="pulseModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pulseModalTitle"><div class="modalbox" tabindex="-1"><div class="eyebrow">Økonomisk puls</div><h2 id="pulseModalTitle" style="margin-top:6px">Kort, prioritert og konkret</h2><p class="sub">Pulsen viser maksimalt tre signaler: hva som går bra, hva som bør følges med på og hva som gir størst effekt nå.</p><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="close-modal" data-modal-id="pulseModal">Lukk</button></div></div></div>
+<div id="compareNameModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="compareNameTitle"><div class="modalbox" tabindex="-1"><h3 id="compareNameTitle">Lagre budsjettversjon</h3><div class="field"><label for="snapshotName">Navn</label><input id="snapshotName" type="text" maxlength="80" placeholder="For eksempel: Januar 2026"></div><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="confirm-budget-snapshot">Lagre</button><button class="secondary" data-action="close-modal" data-modal-id="compareNameModal">Avbryt</button></div></div></div>
 
-</div>
-
-<div id="goalModal" class="modal">
-  <div class="modalbox">
+<div id="goalModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="goalModalTitle">
+  <div class="modalbox" tabindex="-1">
     <div class="eyebrow">Målsetting</div>
     <h2 id="goalModalTitle" style="margin-top:6px">Nytt mål</h2>
     <input id="goalEditId" type="hidden">
     <div class="form-grid" style="margin-top:14px">
-      <div class="field"><label>Navn på målet</label><input id="goalName" type="text" placeholder="For eksempel: Trygg buffer"></div>
+      <div class="field"><label for="goalName">Navn på målet</label><input id="goalName" type="text" maxlength="80" placeholder="For eksempel: Trygg buffer"></div>
       <div class="field"><label>Hva vil du måle?</label>
         <select id="goalMetric">
           <option value="buffer">Disponibel buffer</option>
@@ -504,18 +514,18 @@
 </div>
 
 <div id="tooltip" class="tooltip"></div>
-<div id="toast" class="toast"></div><div id="changeToast" class="change-toast"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div><div id="changeToast" class="change-toast" role="status" aria-live="polite"></div>
 
-<div id="onboardingModal" class="modal">
-  <div class="modalbox">
+<div id="onboardingModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="onboardingTitle">
+  <div class="modalbox" tabindex="-1">
     <div class="eyebrow">Velkommen</div>
-    <h2 style="margin-top:6px">Sett opp din økonomiske fremtid</h2>
+    <h2 id="onboardingTitle" style="margin-top:6px">Sett opp din økonomiske fremtid</h2>
     <p class="sub">Appen lagrer kun data lokalt på enheten din. Appen starter med en statistisk norsk referansehusholdning for 2026. Erstatt verdiene med dine egne for å gjøre vurderingen personlig.</p>
     <div class="form-grid" style="margin-top:16px">
-      <div class="field"><label>Netto månedslønn</label><input id="onboardIncome" type="number" value="59650"></div>
-      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="2505"></div>
-      <div class="field"><label>Alder</label><input id="onboardAge" type="number" value="42"></div>
-      <div class="field"><label>Ønsket pensjonsalder</label><input id="onboardRetire" type="number" value="67"></div>
+      <div class="field"><label>Netto månedslønn</label><input id="onboardIncome" type="number" value="59650" required></div>
+      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="2505" required></div>
+      <div class="field"><label>Alder</label><input id="onboardAge" type="number" value="42" required></div>
+      <div class="field"><label>Ønsket pensjonsalder</label><input id="onboardRetire" type="number" value="67" required></div>
     </div>
     <div class="small-actions" style="margin-top:16px">
       <button class="primary" data-action="complete-onboarding">Kom i gang</button>
@@ -524,10 +534,23 @@
   </div>
 </div>
 
-<div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" data-action="export-data">Eksporter</button><button class="danger" data-action="reset-all">Tilbakestill alle data</button><button class="primary" data-action="close-modal" data-modal-id="dataModal">Lukk</button></div></div></div>
+<div id="dataModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="dataModalTitle"><div class="modalbox" tabindex="-1"><h3 id="dataModalTitle">Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div id="dataModalRecoveryStatus" class="sub recovery-status" role="status" aria-live="polite"></div><div class="small-actions" style="margin-top:14px"><button class="secondary" data-action="export-data">Eksporter</button><button id="dataModalRecoverButton" class="secondary" data-action="recover-data">Gjenopprett forrige data</button><button class="danger" data-action="reset-all">Tilbakestill alle data</button><button class="primary" data-action="close-modal" data-modal-id="dataModal">Lukk</button></div></div></div>
 
-<script src="assets/finance.js?v=v8-phase3-1" defer></script>
-<script src="assets/recommendations.js?v=v8-phase3-1" defer></script>
-<script src="assets/app.js?v=v8-phase3-1" defer></script>
+<div id="confirmModal" class="modal" role="alertdialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+  <div class="modalbox confirm-box" tabindex="-1">
+    <div class="eyebrow">Bekreft handling</div>
+    <h2 id="confirmTitle" style="margin-top:6px">Er du sikker?</h2>
+    <p id="confirmText" class="sub"></p>
+    <div class="small-actions" style="margin-top:18px">
+      <button class="secondary" data-action="confirm-cancel">Avbryt</button>
+      <button id="confirmAccept" class="danger" data-action="confirm-accept">Fortsett</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/quality.js?v=v2-launch-20260722" defer></script>
+<script src="assets/finance.js?v=v2-launch-20260722" defer></script>
+<script src="assets/recommendations.js?v=v2-launch-20260722" defer></script>
+<script src="assets/app.js?v=v2-launch-20260722" defer></script>
 </body>
 </html>

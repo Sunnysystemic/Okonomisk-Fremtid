@@ -4,6 +4,9 @@ require("../assets/finance.js");
 require("../assets/recommendations.js");
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
+const approximately = (actual, expected, tolerance = 1) => {
+  assert(Math.abs(actual - expected) <= tolerance, `Forventet omtrent ${expected}, fikk ${actual}`);
+};
 const fmtNok = (value) => `${Math.round(Number(value) || 0).toLocaleString("nb-NO")} kr`;
 const fmtPct = (value) => `${Math.round((Number(value) || 0) * 100)} %`;
 const futureValueMonthly = (monthly, rate, years) => {
@@ -61,6 +64,37 @@ function baseState() {
   };
 }
 
+function referenceState() {
+  const state = baseState();
+  state.profile.buffer = 53266;
+  state.annual = { travel: 0, gifts: 0, health: 0, maintenance: 0 };
+  state.budget = [
+    { id: "housing", name: "Andre faste utgifter", amount: 21207, type: "fixed" },
+    { id: "variable", name: "Variable utgifter", amount: 29861, type: "variable" },
+    { id: "insurance", name: "Forsikring", amount: 2198, type: "fixed" },
+    { id: "investment", name: "Investering", amount: 2505, type: "saving", linked: true },
+  ];
+  state.life.monthlyInvestment = 2505;
+  state.life.salary = 744840;
+  state.life.salaryGrowth = 3;
+  state.life.raiseShare = 4.2;
+  state.life.portfolioStart = 91000;
+  state.life.ipsStart = 0;
+  state.life.otpStart = 0;
+  state.life.ipsAnnual = 0;
+  state.life.otpRate = 4;
+  state.life.homeValue = 4576100;
+  state.life.mortgage = 2071800;
+  state.life.mortgageRate = 5.08;
+  state.life.loanYears = 25;
+  state.life.homeGrowth = 2;
+  state.life.annualPrincipal = 44000;
+  state.life.retLow = 7;
+  state.life.retMid = 9;
+  state.life.retHigh = 11;
+  return state;
+}
+
 function financeFor(state) {
   let projections = { low: [], mid: [], high: [] };
   const engine = globalThis.OFFinance.createFinanceEngine({
@@ -91,9 +125,46 @@ function recommendationsFor(state) {
   const { engine, projections } = financeFor(state);
   const totals = engine.totals();
   assert(totals.remaining > 0, "Referansebudsjettet skal ha positiv kontantstrøm");
+  approximately(totals.total + totals.remaining, state.profile.netIncome, 0.01);
   assert.strictEqual(projections.mid.length, state.life.retireAge - state.life.startAge + 1);
+  assert.strictEqual(projections.mid[0].year, state.life.startYear);
+  assert.strictEqual(projections.mid[0].age, state.life.startAge);
+  assert.strictEqual(projections.mid.at(-1).age, state.life.retireAge);
+  approximately(projections.mid[0].net, engine.nowNetWorth(), 0.01);
+  approximately(projections.mid[0].port, state.life.portfolioStart, 0.01);
+  approximately(projections.mid[0].home, state.life.homeValue, 0.01);
+  approximately(projections.mid[0].loan, state.life.mortgage, 0.01);
+  approximately(projections.mid[0].real, projections.mid[0].net, 0.01);
+  approximately(projections.mid[1].real, projections.mid[1].net / 1.02, 0.01);
   assert(engine.health().score >= 0 && engine.health().score <= 100);
   assert(engine.simulateLoan(1000).interestSaved > 0, "Ekstra avdrag skal spare renter");
+  approximately(engine.mortgagePayment(2000000, 0.05, 25, "annuity"), 11691.80, 1);
+  approximately(engine.mortgagePayment(1200000, 0, 10, "annuity"), 10000, 0.01);
+}
+
+{
+  const state = referenceState();
+  const { engine } = financeFor(state);
+  const totals = engine.totals();
+  assert.strictEqual(totals.expenses, 53266, "Referanseutgiftene skal være 53 266 kr per måned");
+  assert.strictEqual(totals.remaining, 3879, "Referansebudsjettet skal ha 3 879 kr til overs");
+  assert.strictEqual(engine.health().score, 66, "Norsk referanseprofil skal starte på 66 av 100 i appens modell");
+}
+
+{
+  const state = baseState();
+  state.life.salaryGrowth = 0;
+  state.life.raiseShare = 0;
+  state.life.otpRate = 0;
+  state.life.ipsAnnual = 0;
+  state.life.includeHome = false;
+  state.life.bonus = 12000;
+  const { engine, projections } = financeFor(state);
+  const firstFutureYear = projections.mid[1];
+  approximately(firstFutureYear.port, (state.life.portfolioStart + state.life.monthlyInvestment * 12 + 12000) * 1.07, 0.01);
+  assert.strictEqual(firstFutureYear.home, 0);
+  assert.strictEqual(firstFutureYear.loan, 0);
+  approximately(engine.nowNetWorth(), state.profile.buffer + state.life.portfolioStart + state.life.ipsStart + state.life.otpStart, 0.01);
 }
 
 {

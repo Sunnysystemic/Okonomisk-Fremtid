@@ -1,5 +1,24 @@
 # Endringslogg
 
+## Lanseringskandidat v2 – full kontrollrunde
+
+- Referanseprofilen skiller nå eksplisitt mellom offisielle SSB-tall og appens modellantakelser.
+- Budsjettunderposter omtales som referansenivåer, ikke som direkte SSB-gjennomsnitt.
+- Fremtidsberegningen starter nå korrekt med dagens beholdninger uten et ekstra avkastningsår.
+- Alle tallfelter har felles validering, grenser og forståelige feiltekster.
+- Import, tilbakestilling og sletting har robuste bekreftelser og lokal gjenoppretting.
+- Alle dialoger har forbedret tastaturstyring og tilgjengelig semantikk.
+- Testpakken dekker nå referanseprofilens 53 266 kr i forbruk, 3 879 kr til overs og 66/100 i økonomisk helse.
+- Kilder, forutsetninger, avgrensninger og gjennomførte kontroller er samlet i `LANSERINGSKONTROLL.md`.
+
+## Kontrollgjennomgang – dato og skjemafelt
+
+- Nettleserens ustabile månedsfelt er erstattet av separate, tydelige valg for måned og år.
+- Regnskapet viser alltid hele måneden, for eksempel «Juli 2026».
+- Native tallpiler er fjernet slik at tallfelter ser like ut på tvers av nettlesere.
+- Alle skjemafelt er begrenset til tilgjengelig bredde og kontrolleres for sideveis overløp.
+- Regnskapets verktøylinje har en stabil layout på stor skjerm, nettbrett og mobil.
+
 ## Fase 3 – gjennomgående design
 
 - Alle faner bruker nå samme fargepalett, typografi, kort, knapper, skjemaer og tabeller.
