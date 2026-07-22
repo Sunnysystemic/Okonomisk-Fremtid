@@ -1,9 +1,11 @@
-const CACHE_NAME = "okonomisk-fremtid-v4-design-regnskap-20260722-2";
+const CACHE_NAME = "okonomisk-fremtid-v5-phase1-20260722-3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./privacy.html",
+  "./assets/styles.css",
+  "./assets/app.js",
   "./icon-192.png",
   "./icon-512.png",
 ];
