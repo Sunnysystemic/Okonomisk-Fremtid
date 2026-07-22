@@ -565,7 +565,10 @@ function renderRecommendations(){
      <div class="recommendation-rank">${i+2}</div>
      <h3>${escapeHtml(r.title)}</h3>
      <div class="sub">${escapeHtml(r.description)}</div>
-     <div class="recommendation-meta"><span>${escapeHtml(r.effect)}</span><span>${r.healthDelta>0?`+${r.healthDelta} helsepoeng`:"Målrettet tiltak"}</span></div>
+     <div class="recommendation-meta">
+       <div class="recommendation-metric"><span>Forventet effekt</span><strong>${escapeHtml(r.effect)}</strong></div>
+       <div class="recommendation-metric"><span>Økonomisk helse</span><strong>${r.healthDelta>0?`+${r.healthDelta} poeng`:"Bevarer nivået"}</strong></div>
+     </div>
      <div class="recommendation-actions">
        <button class="primary" data-action="apply-recommendation" data-recommendation-id="${escapeHtml(r.id)}">Prøv</button>
        <button class="secondary" data-action="complete-recommendation" data-recommendation-id="${escapeHtml(r.id)}">Fullført</button>
@@ -1105,9 +1108,22 @@ function addRecommendedZeroRows(){
  renderAll();toast("Anbefalte poster er lagt til")
 }
 function drawBudgetChart(){
- const t=totals(),data=[["Faste",t.fixed,"#15803d"],["Variable",t.variable,"#dc2626"],["Årlige",t.annual,"#d97706"],["Investering",t.investment,"#2563eb"],["Til overs",Math.max(0,t.remaining),"#14b8a6"]].filter(x=>x[1]>0);
- drawDonut("budgetChart",data,state.profile.netIncome);
- document.getElementById("budgetLegend").innerHTML=data.map(x=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${x[2]};margin-right:7px"></span>${x[0]}</span><strong>${fmtNok(x[1])}</strong></div>`).join("")
+ const t=totals(),income=Math.max(1,state.profile.netIncome),allocated=t.fixed+t.variable+t.annual+t.investment;
+ const data=[
+  {name:"Faste",value:t.fixed,color:"#0f766e"},
+  {name:"Variable",value:t.variable,color:"#2dd4bf"},
+  {name:"Årlige",value:t.annual,color:"#f59e0b"},
+  {name:"Investering",value:t.investment,color:"#2563eb"},
+  {name:"Til overs",value:Math.max(0,t.remaining),color:"#cbd5e1"}
+ ].filter(item=>item.value>0);
+ const allocatedPct=allocated/income*100,bar=document.getElementById("budgetAllocationBar");
+ document.getElementById("budgetAllocatedPct").textContent=`${Math.round(allocatedPct)} %`;
+ const remaining=document.getElementById("budgetAllocationRemaining");
+ remaining.textContent=t.remaining>=0?fmtNok(t.remaining):`${fmtNok(Math.abs(t.remaining))} over`;
+ remaining.className=t.remaining>=0?"good":"bad";
+ bar.setAttribute("aria-label",`${Math.round(allocatedPct)} prosent av nettoinntekten er disponert`);
+ bar.innerHTML=data.map(item=>`<span style="width:${Math.max(0,item.value/income*100)}%;background:${item.color}" title="${escapeHtml(item.name)}: ${fmtNok(item.value)}"></span>`).join("");
+ document.getElementById("budgetLegend").innerHTML=data.map(item=>`<div class="allocation-item"><span class="allocation-dot" style="background:${item.color}"></span><div><strong>${escapeHtml(item.name)}</strong><span>${fmtPct(item.value/income)} av inntekten</span></div><strong>${fmtNok(item.value)}</strong></div>`).join("")
 }
 function renderFuture(){
  if(!projections.mid||!projections.low||!projections.high)recalc();
@@ -1407,13 +1423,6 @@ function drawLineChart(id,series,labels){
  for(let t=0;t<Math.min(7,labels.length);t++){const i=Math.round(t*(labels.length-1)/(Math.min(7,labels.length)-1));x.textAlign="center";x.fillText(labels[i],X(i),h-20)}
  series.forEach((s,k)=>{x.strokeStyle=s.color;x.lineWidth=3;x.beginPath();s.data.forEach((v,i)=>i?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v)));x.stroke();x.fillStyle=s.color;x.fillRect(pad.l+k*150,14,18,4);x.fillStyle=getComputedStyle(document.body).getPropertyValue("--text");x.textAlign="left";x.fillText(s.name,pad.l+24+k*150,18)})
 }
-function drawDonut(id,data,total){
- const c=document.getElementById(id);if(!c)return;const rect=c.getBoundingClientRect(),dpr=devicePixelRatio||1,w=Math.max(300,rect.width),h=Math.max(260,rect.height);c.width=w*dpr;c.height=h*dpr;const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
- const cx=w/2,cy=h/2,r=Math.min(w,h)*.34,inner=r*.58,sum=data.reduce((s,a)=>s+a[1],0)||1;let a=-Math.PI/2;
- data.forEach(d=>{const b=a+Math.PI*2*d[1]/sum;x.beginPath();x.arc(cx,cy,r,a,b);x.arc(cx,cy,inner,b,a,true);x.closePath();x.fillStyle=d[2];x.fill();a=b});
- x.textAlign="center";x.fillStyle=getComputedStyle(document.body).getPropertyValue("--text");x.font="900 24px system-ui";x.fillText(fmtNok(total),cx,cy);x.font="12px system-ui";x.fillStyle=getComputedStyle(document.body).getPropertyValue("--muted");x.fillText("Netto inntekt",cx,cy+23)
-}
-
 function registerServiceWorker(){
  if(!("serviceWorker" in navigator))return;
  navigator.serviceWorker.register("sw.js").then(registration=>registration.update()).catch(error=>console.warn("Service worker kunne ikke registreres",error));

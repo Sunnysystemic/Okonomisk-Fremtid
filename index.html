@@ -115,10 +115,22 @@
 
 
   <div class="grid2">
-    <div class="card">
+    <div class="card" id="budgetAllocationCard">
       <div class="section-title"><div><h3>Fordeling</h3><div class="sub">Faste, variable, årlige avsetninger og investering</div></div></div>
-      <div class="chartbox"><canvas id="budgetChart"></canvas></div>
-      <div id="budgetLegend"></div>
+      <div class="budget-allocation">
+        <div class="allocation-summary">
+          <div>
+            <div class="eyebrow">Disponert av nettoinntekt</div>
+            <strong id="budgetAllocatedPct" class="allocation-value">–</strong>
+          </div>
+          <div class="allocation-balance">
+            <span>Til overs</span>
+            <strong id="budgetAllocationRemaining">–</strong>
+          </div>
+        </div>
+        <div id="budgetAllocationBar" class="allocation-bar" role="img" aria-label="Fordeling av nettoinntekt"></div>
+        <div id="budgetLegend" class="allocation-list"></div>
+      </div>
     </div>
     <div class="card">
       <div class="section-title"><div><h3>Økonomisk profil</h3><div class="sub">Gjør innsiktene mer relevante</div></div></div>
