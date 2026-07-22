@@ -1,0 +1,538 @@
+
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Økonomisk fremtid</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">Ø</div><div><span>Økonomisk fremtid</span><div style="font-size:11px;font-weight:650;color:var(--muted)">Ta bedre valg i dag – forstå konsekvensene over tid</div></div></div>
+  <div class="top-actions">
+    <span id="saveStatus" class="sub hide-mobile">Lagret lokalt</span>
+    <button class="iconbtn" data-action="toggle-theme" title="Mørk/lys">◐</button>
+    <button class="iconbtn app-guide-button" data-action="app-guide" title="Om verktøyet" aria-label="Om verktøyet">❓ <span class="hide-mobile">Om verktøyet</span></button>
+    <button class="iconbtn hide-mobile" data-action="open-modal" data-modal-id="dataModal">Data</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <button class="navitem active" data-page="dashboard"><span class="navicon">⌂</span>Dashboard</button>
+  <button class="navitem" data-page="budget"><span class="navicon">▦</span>Budsjett</button>
+  <button class="navitem" data-page="future"><span class="navicon">↗</span>Fremtid</button>
+  <button class="navitem" data-page="decisions"><span class="navicon">◇</span>Beslutninger</button>
+  <button class="navitem" data-page="goals"><span class="navicon">◎</span>Plan</button>
+  <button class="navitem" data-page="settings"><span class="navicon">⚙</span>Innstillinger</button>
+</aside>
+
+<main class="main">
+<div id="appNotice" class="app-notice render-error" role="status" aria-live="polite"></div>
+<section id="dashboard" class="page active">
+
+  <div class="card focus-card" id="monthlyFocusCard" style="margin-bottom:16px">
+    <div class="focus-tag">I fokus denne måneden</div>
+    <div id="focusTitle" class="focus-title">–</div>
+    <div id="focusDescription" class="sub">–</div>
+    <div id="focusImpact" class="focus-impact"></div>
+    <div class="focus-actions">
+      <button id="focusTryButton" class="primary">Prøv i simulatoren</button>
+      <button id="focusCompleteButton" class="secondary">Marker som fullført</button>
+      <button id="focusDismissButton" class="secondary">Ikke vis igjen nå</button>
+    </div>
+  </div>
+
+  <div class="hero" id="dashboardOverview">
+    <div class="card hero-card actionable" id="dashboardFutureCard" data-edit-target="future" role="button" tabindex="0" aria-label="Åpne Fremtid">
+      <div class="reference-mode-badge" id="referenceModeBadge">Norsk referansehusholdning 2026</div><div class="eyebrow" style="margin-top:12px">Forventet nettoformue ved pensjon</div>
+      <div id="heroFuture" class="big">–</div>
+      <div id="heroReal" class="sub">– i dagens kroner</div>
+      <div style="margin-top:24px">
+        <div class="sub" id="heroProgressLabel">Fremdrift mot ditt første valgte mål</div>
+        <div class="progress" style="margin-top:8px"><span id="heroProgress" style="width:0%"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">
+        <div><div class="eyebrow">Økonomisk helse</div></div>
+        <button class="iconbtn" data-action="health-info" title="Hvordan beregnes dette?" aria-label="Hvordan beregnes økonomisk helse?">?</button>
+      </div>
+      <div id="healthScore" class="big" style="color:var(--brand)">–</div>
+      <div id="healthText" class="sub">–</div>
+      <div class="progress" style="margin-top:14px"><span id="healthProgress"></span></div>
+      <div id="healthBreakdown" class="health-breakdown"></div>
+      <div id="topAdvice" class="health-explain"></div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi actionable" data-edit-target="networth" role="button" tabindex="0"><div class="eyebrow">Nettoformue nå</div><div id="kpiNetWorth" class="value">–</div><div class="sub">Klikk for å endre startverdier</div></div>
+    <div class="kpi actionable" data-edit-target="investment" role="button" tabindex="0"><div class="eyebrow">Månedlig investering</div><div id="kpiInvestment" class="value">–</div><div class="sub">Klikk for å endre i budsjettet</div></div>
+    <div class="kpi actionable" data-edit-target="budget" role="button" tabindex="0"><div class="eyebrow">Kontantstrøm</div><div id="kpiCashflow" class="value">–</div><div class="sub">Klikk for å åpne budsjettet</div></div>
+    <div class="kpi actionable" data-edit-target="mortgage" role="button" tabindex="0"><div class="eyebrow">Rentetålighet</div><div id="kpiRateTolerance" class="value">–</div><div class="sub">Klikk for å endre lån og rente</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card actionable" data-edit-target="future" role="button" tabindex="0">
+      <div class="section-title"><div><h3>Formuesutvikling</h3><div class="sub">Forventet scenario</div></div><span class="badge">Interaktiv</span></div>
+      <div class="chartbox"><canvas id="dashboardChart"></canvas></div>
+    </div>
+    <div class="card actionable" data-edit-target="goals" role="button" tabindex="0">
+      <div class="section-title"><div><h3>Neste milepæler</h3><div class="sub">Hva planen kan føre til</div></div></div>
+      <div id="milestones"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px" id="economicPulseCard">
+    <div class="section-title"><div><h3>Økonomisk puls</h3><div class="sub">Tre ting som betyr mest akkurat nå</div></div><button class="iconbtn" data-action="pulse-info" aria-label="Om økonomisk puls">?</button></div>
+    <div id="economicPulse" class="pulse-grid"></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Andre anbefalinger</h3><div class="sub">Kun de to neste tiltakene</div></div></div>
+    <div id="secondaryRecommendations" class="recommendations-grid"></div>
+  </div>
+</section>
+
+<section id="budget" class="page">
+  <div class="section-title"><div><h2>Budsjett og regnskap</h2><div class="sub">Planlegg pengene – og se hvordan måneden faktisk gikk</div></div><button id="newBudgetRowButton" class="secondary" data-action="add-budget-row">+ Ny post</button></div>
+  <div class="budget-mode-switch" role="tablist" aria-label="Velg budsjett eller regnskap">
+    <button id="budgetModePlan" role="tab" aria-selected="true" data-action="budget-mode" data-mode="budget">Budsjett</button>
+    <button id="budgetModeAccounting" role="tab" aria-selected="false" data-action="budget-mode" data-mode="accounting">Regnskap</button>
+  </div>
+  <div id="budgetPlanView">
+  <div class="kpis">
+    <div class="kpi"><div class="eyebrow">Netto inntekt</div><div id="bIncome" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Utgifter</div><div id="bExpenses" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Investering</div><div id="bInvestment" class="value">–</div></div>
+    <div class="kpi"><div class="eyebrow">Til overs</div><div id="bRemaining" class="value">–</div></div>
+  </div>
+
+
+  <div class="grid2">
+    <div class="card" id="budgetAllocationCard">
+      <div class="section-title"><div><h3>Fordeling</h3><div class="sub">Faste, variable, årlige avsetninger og investering</div></div></div>
+      <div class="budget-allocation">
+        <div class="allocation-summary">
+          <div>
+            <div class="eyebrow">Disponert av nettoinntekt</div>
+            <strong id="budgetAllocatedPct" class="allocation-value">–</strong>
+          </div>
+          <div class="allocation-balance">
+            <span>Til overs</span>
+            <strong id="budgetAllocationRemaining">–</strong>
+          </div>
+        </div>
+        <div id="budgetAllocationBar" class="allocation-bar" role="img" aria-label="Fordeling av nettoinntekt"></div>
+        <div id="budgetLegend" class="allocation-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title"><div><h3>Økonomisk profil</h3><div class="sub">Gjør innsiktene mer relevante</div></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Netto månedslønn</label><input id="netIncome" type="number"></div>
+        <div class="field"><label>Disponibel buffer</label><input id="buffer" type="number"></div>
+        <div class="field"><label>Voksne</label><input id="adults" type="number" min="1"></div>
+        <div class="field"><label>Barn</label><input id="children" type="number" min="0"></div>
+        <div class="field"><label>Har bil</label><select id="hasCar"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+        <div class="field"><label>Eier bolig</label><select id="ownsHome"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px" id="budgetEntriesCard">
+      <div class="reference-banner">
+        <strong>Startpunkt: norsk referansehusholdning 2026</strong>
+        <div class="sub">Postene er fylt med SSBs gjennomsnittlige husholdningsforbruk fra 2022, prisjustert til juni 2026. Når du endrer et beløp, vises avviket direkte ved posten.</div>
+      </div>
+    <div class="section-title"><div><h3>Budsjettposter</h3><div class="sub">Feltene oppdateres uten at tabellen hopper eller mister fokus</div></div><button class="secondary" data-action="add-recommended-rows">Legg til anbefalte poster</button></div>
+    <div class="tablewrap">
+      <table><thead><tr><th>Kategori</th><th>Beløp</th><th>%</th><th>Type</th><th></th></tr></thead><tbody id="budgetBody"></tbody><tfoot><tr><th>Sum</th><th id="budgetSum">–</th><th id="budgetPct">–</th><th colspan="2"></th></tr></tfoot></table>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <div class="section-title"><div><h3>Årlige kostnader</h3><div class="sub">Omregnes til månedlig belastning</div></div></div>
+      <div class="form-grid">
+        <div class="field"><label>Ferie og reise / år</label><input id="annualTravel" type="number"></div>
+        <div class="field"><label>Gaver og høytider / år</label><input id="annualGifts" type="number"></div>
+        <div class="field"><label>Helse og tannlege / år</label><input id="annualHealth" type="number"></div>
+        <div class="field"><label>Bolig/bil vedlikehold / år</label><input id="annualMaintenance" type="number"></div>
+      </div>
+      <div id="annualMonthly" style="margin-top:14px;font-weight:850"></div>
+    </div>
+    <div class="card">
+      <div class="section-title"><div><h3>Personlige innsikter</h3><div class="sub">Oppdateres automatisk</div></div></div>
+      <div id="budgetInsights" class="insights"></div>
+    </div>
+  </div>
+
+  <div id="budgetComparisonArea">
+    <div id="budgetComparisonLock" class="card" style="margin-top:16px">
+      <div class="budget-lock">
+        <div class="budget-lock-icon">▦</div>
+        <h3>Lag budsjettet først</h3>
+        <div class="sub">Registrer nettoinntekt og de viktigste budsjettpostene. Sammenligningene åpnes når budsjettet har nok informasjon til å være meningsfulle.</div>
+        <button class="primary" style="margin-top:14px" data-action="focus-budget-setup">Gå til budsjettpostene</button>
+      </div>
+    </div>
+    <div id="budgetComparisonContent" style="display:none">
+
+  <div class="card" style="margin-top:16px" id="budgetCompareCard">
+    <div class="section-title">
+      <div><h3>Sammenlign budsjett</h3><div class="sub">Sammenlign dagens budsjett med et målbudsjett eller en tidligere versjon</div></div>
+      <div class="compare-toolbar"><select id="compareSource" class="chipbtn"><option value="target">Målbudsjett</option></select><button class="secondary" data-action="save-target-budget">Bruk dagens som mål</button><button class="secondary" data-action="save-budget-snapshot">Lagre dagens budsjett</button></div>
+    </div>
+    <div id="compareSummary" class="compare-grid"></div><div id="compareRows" class="compare-table"></div>
+  </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="accountingView" style="display:none">
+    <div class="accounting-hero">
+      <div>
+        <div class="focus-tag">Faktisk mot planlagt</div>
+        <h3 id="accountingMonthTitle">Regnskap</h3>
+        <div class="sub">Før inn de faktiske beløpene. Avvik og treffsikkerhet beregnes automatisk.</div>
+      </div>
+      <div class="accounting-toolbar">
+        <div class="field"><label for="accountingMonth">Måned</label><input id="accountingMonth" type="month"></div>
+        <button class="secondary" data-action="copy-budget-accounting">Kopier budsjettall</button>
+        <button class="secondary" data-action="clear-accounting-month">Tøm måneden</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="eyebrow">Budsjettert ut</div><div id="accountingBudgetTotal" class="value">–</div><div class="sub">Inkludert sparing og investering</div></div>
+      <div class="kpi"><div class="eyebrow">Faktisk ut</div><div id="accountingActualTotal" class="value">–</div><div id="accountingCompletionText" class="sub">Ingen poster ført</div></div>
+      <div class="kpi"><div class="eyebrow">Samlet avvik</div><div id="accountingVariance" class="value">–</div><div class="sub">Faktisk minus budsjett</div></div>
+      <div class="kpi"><div class="eyebrow">Treffsikkerhet</div><div id="accountingAccuracy" class="value">–</div><div class="sub">Basert på førte poster</div></div>
+    </div>
+
+    <div class="card" id="accountingEntriesCard">
+      <div class="section-title">
+        <div><h3>Månedens regnskap</h3><div class="sub">Budsjettet ligger fast til venstre. Du fører faktiske beløp i kolonnen ved siden av.</div></div>
+        <div class="field" style="min-width:190px"><label for="accountingIncome">Faktisk nettoinntekt</label><input id="accountingIncome" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Ikke ført" data-accounting-income></div>
+      </div>
+      <div class="accounting-progress"><div class="progress"><span id="accountingProgressBar" style="width:0%"></span></div><strong id="accountingProgressLabel">0 % ført</strong></div>
+      <div class="tablewrap">
+        <table class="accounting-table">
+          <thead><tr><th>Kategori</th><th>Budsjett</th><th>Faktisk</th><th>Avvik</th><th>Vurdering</th></tr></thead>
+          <tbody id="accountingBody"></tbody>
+          <tfoot><tr><th>Sum</th><th id="accountingBudgetSum">–</th><th id="accountingActualSum">–</th><th id="accountingVarianceSum">–</th><th></th></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <div class="section-title"><div><h3>Slik traff du</h3><div class="sub">Samlet vurdering av måneden</div></div></div>
+        <div id="accountingAssessment" class="accounting-summary"></div>
+      </div>
+      <div class="card">
+        <div class="section-title"><div><h3>Største avvik</h3><div class="sub">Postene som skilte seg mest fra planen</div></div></div>
+        <div id="accountingLargestDeviations"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="future" class="page">
+  <div class="section-title"><div><h2>Fremtid</h2><div class="sub">Hvordan økonomien utvikler seg over livet</div></div></div>
+  <div id="futureReferenceBanner" class="reference-banner"></div>
+  <div class="card">
+    <div class="section-title">
+      <div><h3>Nettoformue</h3><div class="sub">Konservativt, forventet og sterkt scenario</div></div>
+      <select id="futureMode" class="chipbtn"><option value="nominal">Nominelle kroner</option><option value="real">Dagens kroner</option><option value="components">Komponenter</option></select>
+    </div>
+    <div class="chartbox tall"><canvas id="futureChart"></canvas></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Tidslinje</h3><div class="sub">Planlagte milepæler</div></div></div>
+    <div id="timeline" class="timeline"></div>
+  </div>
+  <div class="card" style="margin-top:16px" id="forecastSection">
+    <div class="section-title">
+      <div>
+        <h3>Årlig utvikling</h3>
+        <div class="sub">Detaljert utvikling i lønn, investering, pensjon og nettoformue</div>
+      </div>
+      <div class="forecast-toolbar">
+        <select id="forecastInterval" class="chipbtn">
+          <option value="1">Hvert år</option>
+          <option value="3">Hvert 3. år</option>
+          <option value="5">Hvert 5. år</option>
+        </select>
+      </div>
+    </div>
+    <div class="forecast-table-shell polished-forecast">
+      <div class="tablewrap" style="max-height:620px;border:0;border-radius:0">
+        <table>
+          <thead>
+            <tr>
+              <th>År / alder</th>
+              <th>Lønn</th>
+              <th>Mnd. investering</th>
+              <th>Portefølje</th>
+              <th>Pensjon</th>
+              <th>Boligkapital</th>
+              <th>Nettoformue</th>
+              <th>Dagens kroner</th>
+            </tr>
+          </thead>
+          <tbody id="forecastBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="decisions" class="page">
+  <div id="decisionsIntroAnchor" class="section-title"><div><h2>Beslutninger</h2><div class="sub">Se konsekvensene før du endrer planen</div></div></div>
+
+  <div class="scenario-grid">
+    <div class="decision-card" id="decisionInvestmentCard">
+      <h3>Endre månedlig investering</h3>
+      <div class="sliderline"><input id="decisionInvestmentRange" type="range" min="0" max="30000" step="500"><input id="decisionInvestment" type="number"></div>
+      <div class="sub">Endring i forventet nettoformue ved pensjon</div>
+      <div id="decisionInvestmentResult" class="decision-result">–</div>
+      <div id="decisionInvestmentTime" class="sub"></div>
+    </div>
+    <div class="decision-card">
+      <h3>Engangskjøp</h3>
+      <div class="field"><label>Kostnad i dag</label><input id="decisionPurchase" type="number" value="25000"></div>
+      <div class="sub">Alternativ fremtidig verdi dersom beløpet investeres</div>
+      <div id="decisionPurchaseResult" class="decision-result">–</div>
+    </div>
+    <div class="decision-card">
+      <h3>Ny bolig</h3>
+      <div class="field"><label>Ny boligverdi</label><input id="decisionHomeValue" type="number"></div>
+      <div class="field" style="margin-top:10px"><label>Nytt boliglån</label><input id="decisionMortgage" type="number"></div>
+      <div class="sub">Anslått endring i nettoformue ved pensjon</div>
+      <div id="decisionHomeResult" class="decision-result">–</div>
+    </div>
+    <div class="decision-card">
+      <h3>Rentestress</h3>
+      <div class="field" style="margin-bottom:12px"><label>Test ekstra avdrag per måned</label><input id="decisionExtraPrincipal" type="number" min="0" step="500" value="0"></div>
+      <div id="decisionRatePanel"></div>
+      <div id="decisionPrincipalResult" class="sub" style="margin-top:10px"></div>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="goals" class="page">
+  <div class="section-title" id="goalsHeader">
+    <div><h2>Plan</h2><div class="sub">Sett egne mål, se neste milepæler og få konkrete tiltak</div></div>
+    <div class="small-actions">
+      <button class="iconbtn" id="goalsInfoButton" data-action="goals-guide" title="Om Plan" aria-label="Om Plan">?</button>
+      <button class="primary" data-action="open-goal-editor">+ Nytt mål</button>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="goalsOverview">
+      <div class="section-title">
+        <div><h3>Mine mål</h3><div class="sub">Målene brukes på dashboardet og i fremtidstidslinjen</div></div>
+        <span id="goalCountBadge" class="badge">0 mål</span>
+      </div>
+      <div id="goalSuggestions" style="display:none"></div>
+      <div id="goalsList" class="goal-list"></div>
+    </div>
+
+    <div class="card" id="planActionsCard">
+      <div class="section-title">
+        <div><h3>Viktigste tiltak</h3><div class="sub">Maksimalt tre konkrete forbedringer</div></div>
+      </div>
+      <div id="planActions" class="actions-list"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px" id="planMilestonesCard">
+    <div class="section-title">
+      <div><h3>Neste milepæler</h3><div class="sub" id="planMilestonesSubtitle">De nærmeste målene du faktisk har valgt</div></div>
+    </div>
+    <div id="planMilestones"></div>
+  </div>
+</section>
+
+
+<section id="settings" class="page">
+  <div id="settingsIntroAnchor" class="section-title"><div><h2>Innstillinger</h2><div class="sub">Forutsetninger, lån, scenarioer og personvern</div></div></div>
+
+  <div class="grid2">
+    <div class="card" id="settingsIncomeCard">
+      <h3>Inntekt og investering</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Startalder</label><input id="startAge" type="number"></div>
+        <div class="field"><label>Pensjonsalder</label><input id="retireAge" type="number"></div>
+        <div class="field"><label>Startår</label><input id="startYear" type="number"></div>
+        <div class="field"><label>Årslønn</label><input id="salary" type="number"></div>
+        <div class="field"><label>Lønnsvekst %</label><input id="salaryGrowth" type="number" step=".1"></div>
+        <div class="field"><label>Andel lønnsøkning til investering %</label><input id="raiseShare" type="number"></div>
+        <div class="field"><label>Årlig bonusinvestering</label><input id="bonus" type="number"></div>
+        <div class="field"><label>Årlig IPS</label><input id="ipsAnnual" type="number"></div>
+        <div class="field"><label>OTP-sats %</label><input id="otpRate" type="number" step=".1"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Startkapital og bolig</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Ordinær portefølje</label><input id="portfolioStart" type="number"></div>
+        <div class="field"><label>IPS-saldo</label><input id="ipsStart" type="number"></div>
+        <div class="field"><label>Pensjonskonto</label><input id="otpStart" type="number"></div>
+        <div class="field"><label>Boligverdi</label><input id="homeValue" type="number"></div>
+        <div class="field"><label>Boliglån</label><input id="mortgage" type="number"></div>
+        <div class="field"><label>Boligprisvekst %</label><input id="homeGrowth" type="number" step=".1"></div>
+        <div class="field"><label>Årlig avdrag</label><input id="annualPrincipal" type="number"></div>
+        <div class="field"><label>Ta med bolig</label><select id="includeHome"><option value="yes">Ja</option><option value="no">Nei</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Lån og rentetålighet</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Boliglånsrente %</label><input id="mortgageRate" type="number" step=".1"></div>
+        <div class="field"><label>Gjenværende løpetid</label><input id="loanYears" type="number"></div>
+        <div class="field"><label>Lånetype</label><select id="loanType"><option value="annuity">Annuitetslån</option><option value="serial">Serielån</option><option value="interestOnly">Avdragsfritt</option></select></div>
+        <div class="field"><label>Boliglånsbetaling i budsjett</label><input id="budgetMortgagePayment" type="number"></div>
+      </div>
+      <div id="settingsRatePanel" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <h3>Avkastning og inflasjon</h3>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Inflasjon %</label><input id="inflation" type="number" step=".1"></div>
+        <div class="field"><label>Konservativ avkastning %</label><input id="retLow" type="number" step=".1"></div>
+        <div class="field"><label>Forventet avkastning %</label><input id="retMid" type="number" step=".1"></div>
+        <div class="field"><label>Sterk avkastning %</label><input id="retHigh" type="number" step=".1"></div>
+        <div class="field"><label>Buffer-mål i måneders utgifter</label><input id="goalBufferMonths" type="number" step=".5"></div>
+        <div class="field"><label>Investeringsmål % av netto</label><input id="goalInvestmentRate" type="number"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title"><div><h3>Data og personvern</h3>
+    <p class="sub"><strong>Referansegrunnlag:</strong> Standardprofilen kombinerer de nyeste relevante SSB-tallene med tydelig merkede modellantakelser. Den bruker median husholdningsinntekt etter skatt, gjennomsnittlig husholdningsstørrelse, boutgifter, boligverdi, gjeld, boliglånsrente og finansiell sparing. Buffer, alder og langsiktig avkastning er nøytrale modellantakelser fordi ett representativt gjennomsnitt ikke finnes.</p>
+    <details style="margin:12px 0"><summary style="cursor:pointer;font-weight:850">Se tallene bak norsk referanseprofil</summary><div class="sub" style="margin-top:10px;line-height:1.65">Inntekt: 676 100 kr etter skatt i 2024, prisjustert til 2026. Husholdning: 2,1 personer. Boutgifter: 178 912 kr i 2025. Primærbolig: 4 576 100 kr og gjeld: 2 071 800 kr i 2024 for husholdninger med beløp. Boliglånsrente: 5,08 % i mai 2026. Finansiell investering: 4,2 % av disponibel inntekt i 2025. Gjennomsnittlig OTP-sats: 4 % i 2025. Startalder 42 år, én måneds buffer, 2 % inflasjon og avkastningsscenarioene er modellforutsetninger – ikke SSB-gjennomsnitt.</div></details>
+    <div class="sub">Alt lagres lokalt på denne enheten</div></div></div>
+    <div class="small-actions">
+      <button class="secondary" data-action="export-data">Eksporter sikkerhetskopi</button>
+      <label class="secondary" style="cursor:pointer">Importer<input id="importFile" type="file" accept=".json" hidden></label>
+      <button class="danger" data-action="reset-all">Tilbakestill alt</button>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<nav class="bottom-nav">
+ <button class="active" data-page="dashboard"><span>⌂</span>Hjem</button>
+ <button data-page="budget"><span>▦</span>Budsjett</button>
+ <button data-page="future"><span>↗</span>Fremtid</button>
+ <button data-page="decisions"><span>◇</span>Valg</button>
+ <button data-page="goals"><span>◎</span>Plan</button>
+ <button data-page="settings"><span>⚙</span>Mer</button>
+</nav>
+</div>
+
+
+
+
+<div id="healthModal" class="modal">
+  <div class="modalbox">
+    <div class="eyebrow">Økonomisk helse</div>
+    <h2 style="margin-top:6px">En forklarbar vurdering</h2>
+    <p class="sub">Scoren er appens egen vurderingsmodell – ikke en offentlig eller anerkjent standard. Den bygger på likviditet, sparing, gjeld, robusthet og fremtidig retning.</p>
+    <div id="healthModalBreakdown" class="health-breakdown" style="margin-top:16px"></div>
+    <div class="small-actions" style="margin-top:16px"><button class="primary" data-action="close-modal" data-modal-id="healthModal">Lukk</button></div>
+  </div>
+</div>
+
+<div id="pulseModal" class="modal"><div class="modalbox"><div class="eyebrow">Økonomisk puls</div><h2 style="margin-top:6px">Kort, prioritert og konkret</h2><p class="sub">Pulsen viser maksimalt tre signaler: hva som går bra, hva som bør følges med på og hva som gir størst effekt nå.</p><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="close-modal" data-modal-id="pulseModal">Lukk</button></div></div></div>
+<div id="compareNameModal" class="modal"><div class="modalbox"><h3>Lagre budsjettversjon</h3><div class="field"><label>Navn</label><input id="snapshotName" type="text" placeholder="For eksempel: Januar 2026"></div><div class="small-actions" style="margin-top:16px"><button class="primary" data-action="confirm-budget-snapshot">Lagre</button><button class="secondary" data-action="close-modal" data-modal-id="compareNameModal">Avbryt</button></div></div></div>
+
+</div>
+
+<div id="goalModal" class="modal">
+  <div class="modalbox">
+    <div class="eyebrow">Målsetting</div>
+    <h2 id="goalModalTitle" style="margin-top:6px">Nytt mål</h2>
+    <input id="goalEditId" type="hidden">
+    <div class="form-grid" style="margin-top:14px">
+      <div class="field"><label>Navn på målet</label><input id="goalName" type="text" placeholder="For eksempel: Trygg buffer"></div>
+      <div class="field"><label>Hva vil du måle?</label>
+        <select id="goalMetric">
+          <option value="buffer">Disponibel buffer</option>
+          <option value="portfolio">Investeringsportefølje</option>
+          <option value="pension">Pensjonskapital</option>
+          <option value="netWorth">Nettoformue</option>
+          <option value="mortgage">Boliglån under</option>
+          <option value="monthlyInvestment">Månedlig investering</option>
+          <option value="savingsRate">Sparerate av nettoinntekt</option>
+          <option value="debtReduction">Nedbetaling av gjeld</option>
+        </select>
+      </div>
+      <div class="field"><label>Målbeløp</label><input id="goalTarget" type="number" min="0" step="1000"></div>
+      <div class="field"><label>Symbol</label>
+        <select id="goalIcon"><option>🎯</option><option>🌱</option><option>🛡️</option><option>🏠</option><option>📈</option><option>🚀</option><option>🏆</option><option>💰</option></select>
+      </div>
+    </div>
+    <div id="goalPreview" class="insight" style="margin-top:14px"></div>
+    <div class="small-actions" style="margin-top:16px">
+      <button class="primary" data-action="save-goal">Lagre mål</button>
+      <button class="secondary" data-action="close-modal" data-modal-id="goalModal">Avbryt</button>
+    </div>
+  </div>
+</div>
+
+<div id="coachOverlay" class="coach-overlay">
+  <div class="coach-dim" aria-hidden="true"></div>
+  <div id="coachFocus" class="coach-focus"></div>
+  <div id="coachBox" class="coach-box">
+    
+    <div id="coachEyebrow" class="eyebrow">Introduksjon</div>
+    <h3 id="coachTitle" style="margin:5px 0 8px"></h3>
+    <div id="coachText" class="sub"></div>
+    <div class="coach-footer">
+      <div id="coachDots" class="coach-dots"></div>
+      <div class="small-actions">
+        <button id="coachBack" class="secondary coach-back" data-action="guide-previous">Tilbake</button>
+        <button class="secondary" data-action="guide-close">Lukk</button>
+        <button id="coachNext" class="primary" data-action="guide-next">Neste</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+<div id="toast" class="toast"></div><div id="changeToast" class="change-toast"></div>
+
+<div id="onboardingModal" class="modal">
+  <div class="modalbox">
+    <div class="eyebrow">Velkommen</div>
+    <h2 style="margin-top:6px">Sett opp din økonomiske fremtid</h2>
+    <p class="sub">Appen lagrer kun data lokalt på enheten din. Appen starter med en statistisk norsk referansehusholdning for 2026. Erstatt verdiene med dine egne for å gjøre vurderingen personlig.</p>
+    <div class="form-grid" style="margin-top:16px">
+      <div class="field"><label>Netto månedslønn</label><input id="onboardIncome" type="number" value="59650"></div>
+      <div class="field"><label>Månedlig investering</label><input id="onboardInvestment" type="number" value="2505"></div>
+      <div class="field"><label>Alder</label><input id="onboardAge" type="number" value="42"></div>
+      <div class="field"><label>Ønsket pensjonsalder</label><input id="onboardRetire" type="number" value="67"></div>
+    </div>
+    <div class="small-actions" style="margin-top:16px">
+      <button class="primary" data-action="complete-onboarding">Kom i gang</button>
+      <button class="secondary" data-action="explore-onboarding">Utforsk først</button>
+    </div>
+  </div>
+</div>
+
+<div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" data-action="export-data">Eksporter</button><button class="danger" data-action="reset-all">Tilbakestill alle data</button><button class="primary" data-action="close-modal" data-modal-id="dataModal">Lukk</button></div></div></div>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>
