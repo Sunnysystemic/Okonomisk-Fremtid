@@ -1,6 +1,6 @@
-# Økonomisk fremtid – fase 1 og 2 ferdig
+# Økonomisk fremtid – fase 1, 2 og 3 ferdig
 
-Dette er en komplett erstatningspakke. Den inneholder både den stabile kodebasen fra fase 1 og den prioriterte anbefalingsmotoren fra fase 2.
+Dette er en komplett erstatningspakke. Den inneholder den stabile kodebasen fra fase 1, den prioriterte anbefalingsmotoren fra fase 2 og det gjennomgående designsystemet fra fase 3.
 
 ## Oppdater GitHub
 
@@ -14,7 +14,8 @@ GitHub Pages publiserer deretter den nye versjonen automatisk.
 ## Innhold
 
 - `index.html` – appens struktur
-- `assets/styles.css` – felles design
+- `assets/styles.css` – komponentenes grunnstiler
+- `assets/design-system.css` – fase 3-design for hele produktet
 - `assets/app.js` – visning, navigasjon og brukerhandlinger
 - `assets/finance.js` – beregninger og økonomisk helse
 - `assets/recommendations.js` – prioriterte anbefalinger

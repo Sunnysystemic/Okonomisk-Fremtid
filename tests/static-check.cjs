@@ -8,6 +8,7 @@ const app = read("assets/app.js");
 const finance = read("assets/finance.js");
 const recommendations = read("assets/recommendations.js");
 const styles = read("assets/styles.css");
+const design = read("assets/design-system.css");
 const sw = read("sw.js");
 const failures = [];
 
@@ -17,6 +18,7 @@ const requiredFiles = [
   "assets/finance.js",
   "assets/recommendations.js",
   "assets/styles.css",
+  "assets/design-system.css",
   "sw.js",
   "manifest.webmanifest",
   "privacy.html",
@@ -32,6 +34,7 @@ for (const file of requiredFiles) {
 if (/<(?:script|style)>/i.test(html)) failures.push("HTML inneholder fortsatt innebygd stil eller programlogikk.");
 if (/\son(?:click|input|change)\s*=/i.test(html)) failures.push("HTML inneholder fortsatt inline-hendelser.");
 if (!/href="assets\/styles\.css(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke designsystemet.");
+if (!/href="assets\/design-system\.css(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke fase 3-designet.");
 if (!/src="assets\/app\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke app-logikken.");
 if (!/src="assets\/finance\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke beregningsmodulen.");
 if (!/src="assets\/recommendations\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke anbefalingsmotoren.");
@@ -59,6 +62,7 @@ for (const asset of ["./assets/styles.css", "./assets/app.js"]) {
 }
 if (!sw.includes('"./assets/recommendations.js')) failures.push("Offline-cachen mangler anbefalingsmotoren.");
 if (!sw.includes('"./assets/finance.js')) failures.push("Offline-cachen mangler beregningsmodulen.");
+if (!sw.includes('"./assets/design-system.css')) failures.push("Offline-cachen mangler fase 3-designet.");
 
 if (!styles.includes(".accounting-table{table-layout:fixed")) failures.push("Regnskapstabellen mangler stabil kolonnelayout.");
 if (!app.includes("function refreshAccountingLive()")) failures.push("Regnskap mangler oppdatering uten full tabellrendering.");
@@ -85,6 +89,11 @@ if (!styles.includes(".accounting-table tbody tr{display:grid")) failures.push("
 
 if (!html.includes('class="forecast-list"') || !styles.includes(".forecast-row{")) failures.push("Årsutviklingen mangler den moderne periodevisningen.");
 if (html.includes("polished-forecast") || styles.includes(".polished-forecast")) failures.push("Utdatert årstabell ligger fortsatt igjen.");
+
+if (!design.includes("repeat(6,minmax(0,1fr))")) failures.push("Mobilnavigasjonen har ikke plass til alle seks fanene.");
+if (!design.includes("grid-template-columns:42px minmax(0,1fr) minmax(150px,.72fr)")) failures.push("Plantiltakene mangler robust kolonnelayout.");
+if (!design.includes("prefers-reduced-motion:reduce")) failures.push("Designet mangler redusert bevegelse for tilgjengelighet.");
+if (!design.includes("focus-visible")) failures.push("Designet mangler synlig tastaturfokus.");
 
 for (const enginePart of ["function createRecommendationEngine(","function context()","function rank(","function recommendations()"])
   if (!recommendations.includes(enginePart)) failures.push(`Anbefalingsmotoren mangler ${enginePart}.`);

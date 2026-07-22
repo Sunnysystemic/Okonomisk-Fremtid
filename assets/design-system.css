@@ -1,0 +1,328 @@
+/* Økonomisk fremtid – fase 3: samlet designsystem */
+:root{
+  --bg:#f1f5f7;
+  --panel:#ffffff;
+  --panel2:#f5f8f9;
+  --text:#102033;
+  --muted:#66758a;
+  --line:#d9e2e8;
+  --brand:#0d8178;
+  --brand2:#18b8a8;
+  --blue:#2563eb;
+  --gold:#c87c14;
+  --red:#d74646;
+  --green:#148346;
+  --ink:#0d2030;
+  --ink2:#104a49;
+  --aqua:#22c7b7;
+  --aqua-soft:#c9f7f0;
+  --shadow-sm:0 4px 14px rgba(13,32,48,.055);
+  --shadow:0 16px 42px rgba(13,32,48,.09);
+  --shadow-lg:0 24px 64px rgba(13,32,48,.14);
+  --radius-sm:14px;
+  --radius:22px;
+  --radius-lg:28px;
+}
+
+body.dark{
+  --bg:#08131f;
+  --panel:#101d2b;
+  --panel2:#152536;
+  --text:#edf6f8;
+  --muted:#a5b7c5;
+  --line:#294052;
+  --ink:#07131f;
+  --ink2:#0d4443;
+  --shadow-sm:0 5px 16px rgba(0,0,0,.18);
+  --shadow:0 18px 48px rgba(0,0,0,.26);
+  --shadow-lg:0 28px 70px rgba(0,0,0,.34);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,Aptos,"Segoe UI",system-ui,-apple-system,sans-serif;
+  letter-spacing:-.006em;
+  background:
+    radial-gradient(circle at 88% -8%,rgba(24,184,168,.12),transparent 33rem),
+    linear-gradient(180deg,#f6f9fa 0%,var(--bg) 68%);
+  background-attachment:fixed;
+}
+body.dark{background:linear-gradient(180deg,#08131f,#0b1724)}
+
+:where(button,[role="button"],input,select,summary):focus-visible{
+  outline:3px solid rgba(24,184,168,.34);
+  outline-offset:3px;
+}
+button,input,select{min-height:44px}
+button:disabled{cursor:not-allowed}
+
+/* Ramme og navigasjon */
+.topbar{
+  min-height:72px;
+  padding:13px clamp(16px,2vw,28px);
+  background:rgba(246,249,250,.9);
+  border-bottom-color:rgba(148,163,184,.23);
+  box-shadow:0 7px 26px rgba(13,32,48,.045);
+}
+body.dark .topbar{background:rgba(8,19,31,.9)}
+.brand{gap:12px;color:var(--ink);letter-spacing:-.02em}
+body.dark .brand{color:var(--text)}
+.logo{
+  width:40px;height:40px;border-radius:14px;
+  background:linear-gradient(145deg,var(--ink),var(--ink2));
+  box-shadow:0 10px 26px rgba(13,129,120,.24);
+}
+.layout{grid-template-columns:248px minmax(0,1fr);gap:24px;padding:24px;max-width:1600px}
+.sidebar{
+  top:96px;padding:13px;border:1px solid rgba(148,163,184,.24);
+  border-radius:26px;box-shadow:var(--shadow);
+}
+.navitem{
+  position:relative;min-height:48px;margin:3px 0;padding:12px 14px;
+  border:1px solid transparent;border-radius:14px;
+  transition:background .18s,color .18s,border-color .18s,transform .18s;
+}
+.navitem:hover{transform:translateX(2px);background:rgba(24,184,168,.075);color:var(--brand)}
+.navitem.active{
+  color:var(--brand);border-color:rgba(24,184,168,.18);
+  background:linear-gradient(135deg,rgba(13,129,120,.14),rgba(24,184,168,.07));
+  box-shadow:inset 4px 0 0 var(--brand2);
+}
+.navicon{font-size:19px;color:currentColor}
+
+/* Typografi og sidetopper */
+.page>.section-title:first-child{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:148px;margin-bottom:20px;padding:26px 28px;
+  align-items:flex-end;border:0;border-radius:var(--radius-lg);
+  color:#fff;background:linear-gradient(125deg,var(--ink) 0%,#10343d 56%,var(--ink2) 100%);
+  box-shadow:var(--shadow-lg);
+}
+.page>.section-title:first-child:before,
+.page>.section-title:first-child:after{
+  content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none;
+}
+.page>.section-title:first-child:before{
+  width:320px;height:320px;right:-96px;top:-185px;background:rgba(34,199,183,.18);
+}
+.page>.section-title:first-child:after{
+  width:130px;height:130px;right:210px;bottom:-95px;background:rgba(255,255,255,.055);
+}
+.page>.section-title:first-child h2{
+  margin:0;font-size:clamp(31px,3.2vw,46px);line-height:1;letter-spacing:-.045em;
+}
+.page>.section-title:first-child .sub{margin-top:8px;color:#d0f1ee;font-size:15px}
+.page>.section-title:first-child :is(.secondary,.iconbtn){
+  position:relative;z-index:2;color:#fff;background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.2);backdrop-filter:blur(8px);
+}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:.1em}
+.sub{line-height:1.45}
+
+/* Knapper og interaksjoner */
+.primary,.secondary,.iconbtn,.chipbtn,.danger{
+  min-height:44px;padding:10px 15px;border-radius:14px;
+  transition:transform .15s,box-shadow .15s,background .15s,border-color .15s;
+}
+.primary{background:linear-gradient(135deg,#0d8d83,var(--brand2));box-shadow:0 10px 25px rgba(24,184,168,.23)}
+.primary:hover{transform:translateY(-1px);box-shadow:0 13px 28px rgba(24,184,168,.29)}
+.secondary:hover,.iconbtn:hover,.chipbtn:hover{transform:translateY(-1px);border-color:rgba(13,129,120,.34);background:rgba(24,184,168,.07)}
+.danger{background:#fff0f0;border:1px solid #f6caca;color:#a72929}
+.small-actions{gap:9px}
+
+/* Ett tydelig kortspråk */
+.card,.kpi,.decision-card,.goal-card,.time-card,.recommendation-card{
+  border:1px solid rgba(148,163,184,.27);box-shadow:var(--shadow-sm);
+}
+.card{padding:22px;border-radius:var(--radius)}
+.grid2,.grid3{gap:18px}.kpis{gap:14px;margin-bottom:18px}
+.card>.section-title{margin-bottom:18px}
+.card>.section-title h3,.decision-card h3{letter-spacing:-.025em}
+.card>.section-title h3:before,.decision-card h3:before{
+  content:"";display:inline-block;width:23px;height:6px;margin-right:10px;
+  border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand2));vertical-align:5px;
+}
+.kpi{
+  position:relative;overflow:hidden;min-height:126px;padding:19px;border-radius:20px;
+  background:linear-gradient(145deg,var(--panel),rgba(24,184,168,.045));
+}
+.kpi:after{content:"";position:absolute;width:86px;height:86px;right:-36px;top:-42px;border-radius:50%;background:rgba(24,184,168,.1)}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi .eyebrow{color:var(--brand)}
+.kpi .value{font-size:clamp(22px,2vw,28px);letter-spacing:-.035em}
+.actionable{transition:transform .17s,box-shadow .17s,border-color .17s}
+.actionable:hover{border-color:rgba(24,184,168,.38);box-shadow:var(--shadow);transform:translateY(-2px)}
+.edit-highlight,.guide-highlight{outline:4px solid rgba(24,184,168,.38)!important;outline-offset:4px!important;background-color:rgba(24,184,168,.07)!important}
+
+/* Signaturflater */
+.focus-card,.hero-card,.recommendation-card,.time-card{
+  position:relative;overflow:hidden;border:0;color:#fff;
+  background:linear-gradient(125deg,var(--ink) 0%,#10343d 57%,var(--ink2) 100%);
+  box-shadow:var(--shadow-lg);
+}
+.focus-card:after,.hero-card:after,.recommendation-card:after,.time-card:after{
+  content:"";position:absolute;width:270px;height:270px;right:-95px;top:-150px;
+  border-radius:50%;background:rgba(34,199,183,.16);pointer-events:none;
+}
+.focus-card>* ,.hero-card>* ,.recommendation-card>* ,.time-card>*{position:relative;z-index:1}
+.focus-card{padding:28px;border-radius:var(--radius-lg)}
+.focus-title{font-size:clamp(30px,4vw,52px);line-height:1.05;letter-spacing:-.045em}
+.focus-card .sub,.hero-card .sub,.recommendation-card .sub,.time-card .sub{color:#d2f3ef}
+.focus-card .secondary,.recommendation-card .secondary{
+  color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)
+}
+.focus-impact{gap:12px}.focus-impact>div,.recommendation-meta>div{
+  border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.09);border-radius:16px;
+}
+.hero-card{padding:28px;border-radius:var(--radius-lg)}
+.hero-card .big{font-size:clamp(40px,5.2vw,68px)}
+.reference-mode-badge{border-radius:999px;font-weight:850}
+
+/* Økonomisk helse */
+.health-breakdown{display:grid;gap:12px;margin-top:18px}
+.health-row{gap:12px}
+.health-explain{
+  margin-top:18px;padding:15px 16px;border:1px solid rgba(24,184,168,.25);
+  border-left:5px solid var(--brand2);border-radius:15px;background:rgba(24,184,168,.055);
+}
+
+/* Budsjett og regnskap */
+.budget-mode-switch{
+  display:inline-grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;margin:0 0 18px;
+  border-radius:18px;background:var(--ink);box-shadow:0 13px 32px rgba(13,32,48,.14);
+}
+.budget-mode-switch button{min-width:160px;padding:11px 18px;border:0;border-radius:13px;background:transparent;color:#aec3c8;font-weight:850}
+.budget-mode-switch button.active{color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand2));box-shadow:0 8px 20px rgba(24,184,168,.22)}
+.reference-banner{
+  color:var(--text);background:linear-gradient(135deg,rgba(24,184,168,.105),rgba(255,255,255,.62));
+  border:1px solid rgba(24,184,168,.22);box-shadow:var(--shadow-sm);
+}
+body.dark .reference-banner{background:linear-gradient(135deg,rgba(24,184,168,.12),rgba(16,29,43,.9))}
+.reference-banner .sub{color:var(--muted)}
+.budget-allocation{gap:20px}.allocation-value{color:var(--ink);font-size:clamp(36px,4vw,54px)}
+body.dark .allocation-value{color:var(--text)}
+.allocation-bar{height:15px}.allocation-item{border-radius:16px;background:var(--panel)}
+.accounting-hero{
+  padding:26px;border-radius:var(--radius-lg);background:linear-gradient(125deg,var(--ink),var(--ink2));
+  box-shadow:var(--shadow-lg)
+}
+.accounting-table{table-layout:fixed;min-width:820px}
+.accounting-input{min-width:0!important;text-align:right!important;font-variant-numeric:tabular-nums}
+.variance-pill{min-width:104px;padding:7px 10px}
+
+/* Skjemaer */
+.form-grid{gap:14px}.field label{margin-bottom:7px;font-size:11px;letter-spacing:.045em;text-transform:uppercase}
+.field input,.field select,td input,td select{
+  min-height:46px;padding:10px 12px;border-radius:14px;background:var(--panel2);
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+.field input:focus,.field select:focus,td input:focus,td select:focus{
+  outline:0;border-color:var(--brand2);background:var(--panel);box-shadow:0 0 0 4px rgba(24,184,168,.12)
+}
+.sliderline{gap:12px}.sliderline input[type="number"]{font-variant-numeric:tabular-nums}
+
+/* Tabeller */
+.tablewrap{border-radius:19px;border-color:rgba(148,163,184,.28);box-shadow:var(--shadow-sm)}
+table{font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:13px 14px}
+th{
+  color:#dff9f5;background:linear-gradient(135deg,var(--ink),#153d43);
+  border-bottom-color:rgba(255,255,255,.08);font-size:11px;letter-spacing:.055em;text-transform:uppercase;
+}
+tbody tr:nth-child(even){background:rgba(13,129,120,.025)}
+tbody tr:hover{background:rgba(24,184,168,.07)}
+.forecast-table td:nth-child(7){color:var(--brand);font-weight:850;background:rgba(24,184,168,.055)}
+
+/* Fremtid */
+.chartbox{height:410px}.chartbox.tall{height:540px}
+.timeline{gap:14px}.time-card{min-width:230px;padding:18px;border-radius:20px}
+.forecast-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.forecast-table-wrap{max-height:620px}
+
+/* Beslutninger og plan */
+.decision-card{padding:20px;border-radius:20px;background:linear-gradient(145deg,var(--panel),rgba(24,184,168,.035))}
+.decision-result{color:var(--brand);letter-spacing:-.035em}
+.goal-card{padding:17px;border-radius:18px;border-left:5px solid var(--brand2);background:var(--panel)}
+.goal-icon{background:rgba(24,184,168,.11);color:var(--brand)}
+.actions-list{gap:12px}
+.action{
+  grid-template-columns:42px minmax(0,1fr) minmax(150px,.72fr);
+  gap:14px;padding:15px;border-radius:17px;background:linear-gradient(145deg,var(--panel),var(--panel2));
+}
+.action>div{min-width:0}.action .sub{overflow-wrap:anywhere}
+.step{width:38px;height:38px;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+.empty-state{padding:44px 22px;border-color:rgba(24,184,168,.27);background:rgba(24,184,168,.035)}
+
+/* Andre anbefalinger */
+.recommendations-grid{gap:16px}
+.recommendation-card{padding:22px;border-radius:22px;min-height:250px}
+.recommendation-rank{background:rgba(24,184,168,.65)}
+.recommendation-meta{gap:10px}
+.recommendation-meta>div{min-width:0;padding:11px 12px}
+.recommendation-meta .sub{white-space:normal;overflow-wrap:anywhere}
+
+/* Innstillinger, dialoger og tilbakemelding */
+#settings .card>.section-title{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.modal{background:rgba(5,15,24,.58);backdrop-filter:blur(7px)}
+.modalbox{padding:26px;border-radius:26px;box-shadow:var(--shadow-lg)}
+.toast{right:22px;bottom:22px;padding:13px 16px;border-radius:15px;background:var(--ink);box-shadow:var(--shadow-lg)}
+.coach-panel{border-radius:22px;box-shadow:var(--shadow-lg)}
+.badge{padding:6px 9px;border-radius:999px}
+.insight{padding:16px;border-radius:16px}.pulse-item{padding:16px;border-radius:16px}
+
+/* Mellomstore skjermer */
+@media(max-width:1280px){
+  .layout{grid-template-columns:220px minmax(0,1fr);gap:18px;padding:18px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #goals .grid2{grid-template-columns:1fr}
+  .action{grid-template-columns:42px minmax(0,1fr)}
+  .action>div:last-child{grid-column:2}
+}
+
+/* Nettbrett og mobil */
+@media(max-width:1050px){
+  .layout{grid-template-columns:1fr;padding:14px 14px 100px}
+  .bottom-nav{
+    left:10px;right:10px;bottom:10px;grid-template-columns:repeat(6,minmax(0,1fr));
+    padding:7px;border:1px solid rgba(255,255,255,.09);border-radius:20px;
+    background:rgba(13,32,48,.95);backdrop-filter:blur(18px);box-shadow:0 16px 44px rgba(0,0,0,.3)
+  }
+  .bottom-nav button{min-width:0;min-height:54px;padding:7px 2px;color:#a8bbc3}
+  .bottom-nav button.active{color:#fff;background:linear-gradient(135deg,#0d8178,#159d92)}
+}
+
+@media(max-width:760px){
+  .topbar{min-height:64px;padding:10px 12px}.brand{font-size:16px}.logo{width:36px;height:36px}
+  .page>.section-title:first-child{min-height:120px;padding:21px 20px;border-radius:23px}
+  .page>.section-title:first-child h2{font-size:30px}
+  .card{padding:17px;border-radius:20px}.grid2,.grid3,.form-grid,.scenario-grid{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi{min-height:112px;padding:15px}.kpi .value{font-size:21px}
+  .focus-card,.hero-card{padding:21px;border-radius:23px}.focus-title{font-size:32px}
+  .focus-actions{display:grid;grid-template-columns:1fr 1fr}.focus-actions .primary{grid-column:1/-1}
+  .budget-mode-switch{width:100%}.budget-mode-switch button{min-width:0;padding:10px 7px}
+  .chartbox{height:330px}.chartbox.tall{height:420px}
+  .allocation-summary{align-items:flex-start;flex-direction:column}.allocation-balance{width:100%;text-align:left}
+  .allocation-list{grid-template-columns:1fr}
+  .accounting-hero{align-items:stretch;flex-direction:column;padding:20px}
+  .accounting-toolbar{align-items:stretch}.accounting-toolbar .field{width:100%}
+  .accounting-table{min-width:0;table-layout:auto;border-collapse:separate;border-spacing:0;background:transparent}
+  .accounting-table thead{display:none}.accounting-table tbody{display:grid;gap:10px}
+  .accounting-table tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+  .accounting-table tbody td{display:block!important;width:auto!important;padding:0;border:0;text-align:left}
+  .accounting-table tbody td:first-child{grid-column:1/-1}
+  .accounting-input{text-align:left!important}
+  .action{grid-template-columns:38px minmax(0,1fr);padding:13px}.action>div:last-child{grid-column:2}
+  .recommendation-card{min-height:0}.modalbox{padding:20px}
+}
+
+@media(max-width:480px){
+  .layout{padding-left:9px;padding-right:9px}
+  .top-actions{gap:5px}.iconbtn{padding:9px 10px}
+  .kpis{grid-template-columns:1fr}.focus-actions{grid-template-columns:1fr}.focus-actions .primary{grid-column:auto}
+  .bottom-nav{left:6px;right:6px;bottom:6px;padding:5px}.bottom-nav button{font-size:9px}.bottom-nav span{font-size:17px}
+  .action{grid-template-columns:1fr}.action>.step{grid-column:1}.action>div:last-child{grid-column:1}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
