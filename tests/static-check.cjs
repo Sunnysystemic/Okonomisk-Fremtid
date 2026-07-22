@@ -5,6 +5,8 @@ const root = path.resolve(__dirname, "..");
 const read = (name) => fs.readFileSync(path.join(root, name), "utf8");
 const html = read("index.html");
 const app = read("assets/app.js");
+const finance = read("assets/finance.js");
+const recommendations = read("assets/recommendations.js");
 const styles = read("assets/styles.css");
 const sw = read("sw.js");
 const failures = [];
@@ -12,12 +14,16 @@ const failures = [];
 const requiredFiles = [
   "index.html",
   "assets/app.js",
+  "assets/finance.js",
+  "assets/recommendations.js",
   "assets/styles.css",
   "sw.js",
   "manifest.webmanifest",
   "privacy.html",
   "icon-192.png",
   "icon-512.png",
+  "tests/browser-smoke.html",
+  "tests/domain-check.cjs",
 ];
 for (const file of requiredFiles) {
   if (!fs.existsSync(path.join(root, file))) failures.push(`Mangler fil: ${file}`);
@@ -25,8 +31,10 @@ for (const file of requiredFiles) {
 
 if (/<(?:script|style)>/i.test(html)) failures.push("HTML inneholder fortsatt innebygd stil eller programlogikk.");
 if (/\son(?:click|input|change)\s*=/i.test(html)) failures.push("HTML inneholder fortsatt inline-hendelser.");
-if (!html.includes('href="assets/styles.css"')) failures.push("HTML laster ikke designsystemet.");
-if (!html.includes('src="assets/app.js"')) failures.push("HTML laster ikke app-logikken.");
+if (!/href="assets\/styles\.css(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke designsystemet.");
+if (!/src="assets\/app\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke app-logikken.");
+if (!/src="assets\/finance\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke beregningsmodulen.");
+if (!/src="assets\/recommendations\.js(?:\?[^\"]+)?"/.test(html)) failures.push("HTML laster ikke anbefalingsmotoren.");
 if (!app.trimStart().startsWith('(()=>{\n"use strict";')) failures.push("App-logikken er ikke kapslet inn i streng modus.");
 
 const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
@@ -47,8 +55,10 @@ const unhandledActions = usedActions.filter((action) => !handledActions.has(acti
 if (unhandledActions.length) failures.push(`Handlinger uten mottaker: ${unhandledActions.join(", ")}`);
 
 for (const asset of ["./assets/styles.css", "./assets/app.js"]) {
-  if (!sw.includes(`"${asset}"`)) failures.push(`Offline-cachen mangler ${asset}`);
+  if (!sw.includes(`"${asset}`)) failures.push(`Offline-cachen mangler ${asset}`);
 }
+if (!sw.includes('"./assets/recommendations.js')) failures.push("Offline-cachen mangler anbefalingsmotoren.");
+if (!sw.includes('"./assets/finance.js')) failures.push("Offline-cachen mangler beregningsmodulen.");
 
 if (!styles.includes(".accounting-table{table-layout:fixed")) failures.push("Regnskapstabellen mangler stabil kolonnelayout.");
 if (!app.includes("function refreshAccountingLive()")) failures.push("Regnskap mangler oppdatering uten full tabellrendering.");
@@ -72,6 +82,23 @@ for (const renderer of ["renderDashboard()", "renderBudget()", "renderFuture()",
 }
 
 if (!styles.includes(".accounting-table tbody tr{display:grid")) failures.push("Regnskapet mangler stabil kortvisning på mobil.");
+
+if (!html.includes('class="forecast-list"') || !styles.includes(".forecast-row{")) failures.push("Årsutviklingen mangler den moderne periodevisningen.");
+if (html.includes("polished-forecast") || styles.includes(".polished-forecast")) failures.push("Utdatert årstabell ligger fortsatt igjen.");
+
+for (const enginePart of ["function createRecommendationEngine(","function context()","function rank(","function recommendations()"])
+  if (!recommendations.includes(enginePart)) failures.push(`Anbefalingsmotoren mangler ${enginePart}.`);
+for (const financePart of ["function createFinanceEngine(","function totals()","function recalculate()","function health()"])
+  if (!finance.includes(financePart)) failures.push(`Beregningsmodulen mangler ${financePart}.`);
+if (!app.includes('generateRecommendations().slice(0,3)')) failures.push("Plan bruker ikke den samme prioriterte anbefalingsmotoren som dashboardet.");
+if (!app.includes("Planen er ikke endret")) failures.push("Simulatorforslag mangler tydelig beskjed om at grunnplanen ikke endres.");
+if (!app.includes('document.getElementById("focusTag").textContent="Viktigst nå"')) failures.push("Hovedanbefalingen mangler den faste etiketten Viktigst nå.");
+if (/\.onclick\s*=/.test(app + recommendations)) failures.push("Appen inneholder fortsatt direkte onclick-koblinger.");
+if (!app.includes("function applyStateMigrations(")) failures.push("Datamodellen mangler en samlet migreringsflyt.");
+if (app.includes("function migrateLegacyGoals(")) failures.push("Gammel datamigrering kjøres fortsatt fra visningslogikken.");
+if (!app.includes("function milestoneListHtml(") || (app.match(/milestoneListHtml\(/g)||[]).length < 3) failures.push("Milepælvisningene deler ikke én felles komponent.");
+if (!app.includes("function runRuntimeSmokeTests(")) failures.push("Appen mangler automatisert kjørefunksjonstest.");
+if (Buffer.byteLength(app,"utf8") > 95000) failures.push("Appens hovedfil har vokst forbi arkitekturgrensen; flytt domenelogikk til egne moduler.");
 
 if (failures.length) {
   console.error(failures.map((failure) => `FAIL: ${failure}`).join("\n"));

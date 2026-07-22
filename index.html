@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <title>Økonomisk fremtid</title>
-<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/styles.css?v=v7-stable-2">
 </head>
 <body>
 <div class="app">
@@ -37,14 +37,18 @@
 <section id="dashboard" class="page active">
 
   <div class="card focus-card" id="monthlyFocusCard" style="margin-bottom:16px">
-    <div class="focus-tag">I fokus denne måneden</div>
+    <div class="focus-heading">
+      <div id="focusTag" class="focus-tag">Viktigst nå</div>
+      <div id="focusBasis" class="focus-basis">Basert på budsjettet</div>
+    </div>
     <div id="focusTitle" class="focus-title">–</div>
     <div id="focusDescription" class="sub">–</div>
+    <div id="focusReason" class="focus-reason"></div>
     <div id="focusImpact" class="focus-impact"></div>
     <div class="focus-actions">
-      <button id="focusTryButton" class="primary">Prøv i simulatoren</button>
-      <button id="focusCompleteButton" class="secondary">Marker som fullført</button>
-      <button id="focusDismissButton" class="secondary">Ikke vis igjen nå</button>
+      <button id="focusTryButton" class="primary" data-action="apply-recommendation">Se neste steg</button>
+      <button id="focusCompleteButton" class="secondary" data-action="complete-recommendation">Marker som fullført</button>
+      <button id="focusDismissButton" class="secondary" data-action="dismiss-recommendation">Ikke vis igjen nå</button>
     </div>
   </div>
 
@@ -149,7 +153,7 @@
         <strong>Startpunkt: norsk referansehusholdning 2026</strong>
         <div class="sub">Postene er fylt med SSBs gjennomsnittlige husholdningsforbruk fra 2022, prisjustert til juni 2026. Når du endrer et beløp, vises avviket direkte ved posten.</div>
       </div>
-    <div class="section-title"><div><h3>Budsjettposter</h3><div class="sub">Feltene oppdateres uten at tabellen hopper eller mister fokus</div></div><button class="secondary" data-action="add-recommended-rows">Legg til anbefalte poster</button></div>
+    <div class="section-title"><div><h3>Budsjettposter</h3><div class="sub">Feltene oppdateres uten at tabellen hopper eller mister fokus</div></div><button class="secondary" data-action="add-recommended-rows">Kontrollerer anbefalte poster …</button></div>
     <div class="tablewrap">
       <table><thead><tr><th>Kategori</th><th>Beløp</th><th>%</th><th>Type</th><th></th></tr></thead><tbody id="budgetBody"></tbody><tfoot><tr><th>Sum</th><th id="budgetSum">–</th><th id="budgetPct">–</th><th colspan="2"></th></tr></tfoot></table>
     </div>
@@ -265,30 +269,18 @@
       <div class="forecast-toolbar">
         <select id="forecastInterval" class="chipbtn">
           <option value="1">Hvert år</option>
-          <option value="3">Hvert 3. år</option>
+          <option value="3" selected>Hvert 3. år</option>
           <option value="5">Hvert 5. år</option>
         </select>
       </div>
     </div>
-    <div class="forecast-table-shell polished-forecast">
-      <div class="tablewrap" style="max-height:620px;border:0;border-radius:0">
-        <table>
-          <thead>
-            <tr>
-              <th>År / alder</th>
-              <th>Lønn</th>
-              <th>Mnd. investering</th>
-              <th>Portefølje</th>
-              <th>Pensjon</th>
-              <th>Boligkapital</th>
-              <th>Nettoformue</th>
-              <th>Dagens kroner</th>
-            </tr>
-          </thead>
-          <tbody id="forecastBody"></tbody>
-        </table>
-      </div>
+    <div class="forecast-guide" aria-hidden="true">
+      <span>Periode</span>
+      <span>Inntekt og sparing</span>
+      <span>Opparbeidet kapital</span>
+      <span>Samlet verdi</span>
     </div>
+    <div id="forecastBody" class="forecast-list" aria-live="polite"></div>
   </div>
 </section>
 
@@ -533,6 +525,8 @@
 
 <div id="dataModal" class="modal"><div class="modalbox"><h3>Data og personvern</h3><p class="sub">Appen bruker ingen server. Data lagres kun i nettleseren på enheten din. Eksporter sikkerhetskopi dersom du vil flytte data til en annen enhet.</p><p><a href="privacy.html" target="_blank" style="color:var(--brand);font-weight:800">Les personvernerklæringen</a></p><div class="small-actions" style="margin-top:14px"><button class="secondary" data-action="export-data">Eksporter</button><button class="danger" data-action="reset-all">Tilbakestill alle data</button><button class="primary" data-action="close-modal" data-modal-id="dataModal">Lukk</button></div></div></div>
 
-<script src="assets/app.js" defer></script>
+<script src="assets/finance.js?v=v7-stable-2" defer></script>
+<script src="assets/recommendations.js?v=v7-stable-2" defer></script>
+<script src="assets/app.js?v=v7-stable-2" defer></script>
 </body>
 </html>

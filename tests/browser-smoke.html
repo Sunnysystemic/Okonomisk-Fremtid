@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="nb">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Økonomisk fremtid – funksjonstest</title>
+ <style>
+  body{font-family:system-ui,sans-serif;margin:0;padding:24px;background:#f3f7fb;color:#102033}
+  main{max-width:760px;margin:auto;background:#fff;border:1px solid #dbe4ee;border-radius:20px;padding:24px}
+  iframe{position:absolute;width:1px;height:1px;border:0;opacity:0;pointer-events:none}
+  .pass{color:#087f72}.fail{color:#b42318}li{margin:8px 0}
+ </style>
+</head>
+<body>
+ <main>
+  <h1>Funksjonstest</h1>
+  <p id="status">Tester faner, datamigrering og anbefalingsmotor …</p>
+  <ul id="results"></ul>
+ </main>
+ <iframe id="app" src="../index.html?automated-smoke=1" title="Testet app"></iframe>
+ <script>
+  const frame=document.getElementById("app"),status=document.getElementById("status"),results=document.getElementById("results");
+  frame.addEventListener("load",()=>{
+   let attempts=0;
+   const timer=setInterval(()=>{
+    attempts++;
+    const api=frame.contentWindow.__appTest;
+    if(!api&&attempts<40)return;
+    clearInterval(timer);
+    if(!api){status.textContent="FEIL: Appens testgrensesnitt ble ikke tilgjengelig.";status.className="fail";return}
+    const report=api.smoke();
+    status.textContent=report.passed?`BESTÅTT – versjon ${report.version}`:`FEILET – versjon ${report.version}`;
+    status.className=report.passed?"pass":"fail";
+    results.innerHTML=report.checks.map(check=>`<li class="${check.passed?"pass":"fail"}">${check.passed?"✓":"✕"} ${check.name}${check.details?` – ${check.details}`:""}</li>`).join("");
+    document.documentElement.dataset.testResult=report.passed?"pass":"fail";
+   },100);
+  });
+ </script>
+</body>
+</html>
